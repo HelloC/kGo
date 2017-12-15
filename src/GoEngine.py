@@ -11,6 +11,7 @@ import numpy as np
 import sys
 
 from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtMultimedia import QSound
 from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
 
@@ -28,7 +29,7 @@ class GoEngine():
         self.stepsList = []
         self.deadstoneslist = []
         # print(self.stones)
-
+        self.initAudio()
         pass
 
     def newGo(self):
@@ -42,7 +43,12 @@ class GoEngine():
             t[2] = 'e'
         pass
 
+    def initAudio(self):
+        self.maudios = {
+            'move': QSound('src\\resource\\sound\\move.wav'),
+            'deadstone': QSound('src\\resource\\sound\\deadstonemore.wav'),
 
+        }
     def move(self, x, y, color='e', status=False):
 
         # print("move ",x, ' ', y, " ", color, ' ', status)
@@ -69,6 +75,8 @@ class GoEngine():
         if not ret:
             self.stepsList.pop()
 
+        self.maudios['move'].play()
+
         return ret
         pass
     def getStepsLists(self):
@@ -87,6 +95,7 @@ class GoEngine():
             if st:
                 self.collectDeadStoneList(st)
                 self.doClearStatus()
+                self.maudios['deadstone'].play()
         self.updateStepList()
 
         status = self.isStoneLive(stone)
@@ -105,6 +114,7 @@ class GoEngine():
             st[4] = False
         self.deadstoneslist=[]
 
+
         pass
 
     def doCheckStoneAround(self,stone):
@@ -118,7 +128,7 @@ class GoEngine():
 
 
     def isStoneLive(self, stone):
-        print('isStoneLive ', stone)
+        # print('isStoneLive ', stone)
         stone[3] = True
         stone[4] = False
         around = self.getPointAround(stone)
