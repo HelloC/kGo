@@ -12,12 +12,14 @@ from PyQt5.QtCore import QPoint, QPointF, QRect, Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PyQt5.QtGui import QIcon, QPainter, QColor, QPen, QBrush, QPixmap
 
+from src.GoEngine import GoEngine
+
 
 class PicPanel(QWidget):
-    def __init__(self,  *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(PicPanel, self).__init__(*args, **kwargs)
-        self.boardWidth = 600
-        self.boardHeight = 600
+        self.boardWidth = 800
+        self.boardHeight = 800
 
         self.resize(self.boardWidth, self.boardHeight)
         self.setMinimumSize(self.boardWidth, self.boardHeight)
@@ -28,7 +30,12 @@ class PicPanel(QWidget):
 
         self.chosen_points = []
         self.initUI()
+        self.initDataEngine()
         self.show()
+        pass
+
+    def initDataEngine(self):
+        self.goStonesEngine = GoEngine()
         pass
 
     def initUI(self):
@@ -40,14 +47,20 @@ class PicPanel(QWidget):
         # mlayout.addWidget(self.labelBoard)
         # self.setLayout(mlayout)
         pass
+
     def initGoBoardSize(self):
         mlen = self.geometry().width() if self.geometry().width() < self.geometry().height() else self.geometry().height()
-        self.lenght = mlen if mlen <= 800 else 800
+        # self.lenght = mlen if mlen <= 800 else 800
+        self.lenght = mlen
+        # print('geometry ',self.geometry().width())
+        # print('geometry ',self.geometry().height())
         # print('mboardsize ', self.mboardsize)
         self.interval = int(self.lenght * 0.9 // (self.mboardsize - 1))
         # self.interval = 30
+        # print('interval: ', self.interval)
         self.padding = self.interval
         pass
+
     def initGoImages(self):
         self.bdPixmap = QPixmap('src\\resource\\image\\board.png')
         self.blPixmap = QPixmap('src\\resource\\image\\black.png')
@@ -72,8 +85,9 @@ class PicPanel(QWidget):
         self.reCalculateGoImage()
 
         pass
+
     def reCalculateGoImage(self):
-        radio = self.interval*0.9
+        radio = self.interval * 0.9
         self.blackPixmap = self.blPixmap.scaled(radio, radio, Qt.KeepAspectRatio)
         self.whitePixmap = self.wtPixmap.scaled(radio, radio, Qt.KeepAspectRatio)
         pass
@@ -134,44 +148,50 @@ class PicPanel(QWidget):
 
     def drawPoints(self, painter):
         # painter.setPen(QPen())
-        for tpoint in self.chosen_points:
-            # painter.drawPoint(pos)
-            # print(tpoint)
-            # print(tpoint[0])
-            # print(tpoint[1])
-            # print(tpoint[0].x() * self.interval)
-            # print(tpoint[0].y() * self.interval)
+        # print('drawPoints -->')
+        for tpoint in self.goStonesEngine.getStepsLists():
+            # print('tpoint:', tpoint)
 
-            if tpoint[1] is 'b':
-                pmap = self.blackPixmap
-
+            if tpoint[2] is 'b':
+                painter.drawPixmap((tpoint[0] + 1) * self.interval - self.blackPixmap.size().width() / 2,
+                                   (tpoint[1] + 1) * self.interval - self.blackPixmap.size().height() / 2,
+                                   self.blackPixmap)
+            elif tpoint[2] is 'w':
+                painter.drawPixmap((tpoint[0] + 1) * self.interval - self.blackPixmap.size().width() / 2,
+                                   (tpoint[1] + 1) * self.interval - self.blackPixmap.size().height() / 2,
+                                   self.whitePixmap)
             else:
-                pmap = self.whitePixmap
-
                 pass
-            painter.drawPixmap(tpoint[0].x() * self.interval - self.blackPixmap.size().width() / 2,
-                               tpoint[0].y() * self.interval - self.blackPixmap.size().height() / 2,
-                               pmap)
+
+
             pass
 
         pass
 
     def mouseReleaseEvent(self, cursor_event):
         # print(cursor_event.pos())
-        p = self.calculatePoint(cursor_event.pos())
-        if p is not None:
+        print('\n mouseReleaseEvent start')
+
+        px, py = self.xyTorowcol(cursor_event.pos())
+        print('px:', px)
+        print('py:', py)
+
+        if px > 0 and py > 0:
             if self.isBlack is True:
-                self.chosen_points.append((p,'b'))
+                mcolor = 'b'
             else:
-                self.chosen_points.append((p,'w'))
+                mcolor = 'w'
                 pass
-            self.isBlack = not self.isBlack
+            if self.goStonesEngine.move(px, py, mcolor, False) is True:
+                self.isBlack = not self.isBlack
             pass
-            # self.chosen_points.append(self.mapFromGlobal(QtGui.QCursor.pos()))
             self.update()
+            pass
+        # print('mouseReleaseEvent end')
+
         pass
 
-    def calculatePoint(self, pos):
+    def xyTorowcol(self, pos):
         x = pos.x()
         y = pos.y()
         # print('x:', x)
@@ -180,12 +200,14 @@ class PicPanel(QWidget):
         px = self.calPointOne(x)
         py = self.calPointOne(y)
 
-        # print('px:', px)
-        # print('py:', py)
+        # print('xyTorowcol px:', px)
+        # print('xyTorowcol py:', py)
+
         if px is not None and py is not None:
-            return QPoint(px, py)
+            return px, py
         else:
-            return None
+            print('xyTorowcol None:')
+            return -1, -1
 
         pass
 
@@ -208,6 +230,7 @@ class PicPanel(QWidget):
             ret = None
             pass
         return ret
+        pass
 
     pass
 

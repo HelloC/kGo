@@ -1,66 +1,46 @@
 import sys
-
-from PyQt5.QtCore import Qt, QLineF
-from PyQt5.QtGui import QPixmap, QPainter
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QHBoxLayout, QVBoxLayout
-
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSlot
 
 
 class App(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.title = 'PyQt5 image - pythonspot.com'
-        self.left = 200
-        self.top = 200
-        self.width = 600
-        self.height = 600
+        self.title = 'PyQt5 button - pythonspot.com'
+        self.left = 100
+        self.top = 100
+        self.width = 320
+        self.height = 200
+
+        self.list1=[[1,2],['a','b']]
+        self.list2=[]
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        mlayout = QHBoxLayout(self)
 
-        # Create widget
-        self.labelImageboard = QLabel()
-        self.labelImageblack = QLabel()
-        self.labelImagewhite = QLabel()
-
-        self.pixmapboard = QPixmap('board.png')
-        self.pixmapblack = QPixmap('black.png')
-        self.pixmapwhite = QPixmap('white.png')
-
-
-        self.pixmapBd = self.pixmapboard.scaled(600, 600, Qt.KeepAspectRatio)
-        pixmapBl = self.pixmapblack.scaled(64, 64, Qt.KeepAspectRatio)
-        pixmapWt = self.pixmapwhite.scaled(256, 256, Qt.KeepAspectRatio)
-
-        #
-        # self.labelImageblack.setPixmap(pixmapBl)
-        # self.labelImagewhite.setPixmap(pixmapWt)
-
-        # labelImage.setAlignment(Qt.AlignCenter)
-        # self.labelImageblack.resize(0.3 * self.labelImageblack.pixmap().size())
-        # self.labelImageblack.resize(1.5 * self.labelImagewhite.pixmap().size())
-
-        # mlayout.addWidget(self.labelImageblack)
-        # mlayout.addWidget(self.labelImagewhite)
-
-        # self.setLayout(mlayout)
-
-        # self.resize(pixmap.width(), pixmap.height())
-
-        self.labelImageboard.setPixmap(self.pixmapBd)
+        button = QPushButton('btn', self)
+        button.setToolTip('This s an example button')
+        button.move(100, 70)
+        button.clicked.connect(self.on_click)
+        button.setMaximumSize(50,50)
 
         self.show()
-        pass
-    def paintEvent(self, QPaintEvent):
-        painter = QPainter(self.pixmapBd)
-        line = QLineF(10.0, 80.0, 90.0, 20.0)
-        painter.drawLine(line)
-        pass
 
+    @pyqtSlot()
+    def on_click(self):
+        print('PyQt5 button click')
+        print('list1 ', self.list1)
+        print('list2 ', self.list2)
+        self.list2.append(self.list1[1])
+        print('list1 ', self.list1)
+        print('list2 ', self.list2)
+        self.list2[0][1]='h'
+        print('list1 ', self.list1)
+        print('list2 ', self.list2)
 
 
 if __name__ == '__main__':

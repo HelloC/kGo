@@ -10,6 +10,8 @@
 import PyQt5
 
 import sys
+
+from PyQt5.QtCore import Qt, QMargins
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
@@ -24,8 +26,8 @@ class KgoWindow(QMainWindow):
         self.title = 'K-Go'
         self.left = 400
         self.top = 400
-        self.width = 940
-        self.height = 690
+        self.width = 880
+        self.height = 900
         self.setMinimumSize(self.width, self.height)
         self.setMaximumSize(self.width, self.height)
 
@@ -41,7 +43,7 @@ class KgoWindow(QMainWindow):
 
         self.initMenu()
         self.initStatusBar()
-
+        self.initToolBars()
         self.initWinLayout()
 
         self.setCentralWidget(self.topGroupBox)
@@ -58,29 +60,13 @@ class KgoWindow(QMainWindow):
     def initWinLayout(self):
         # self.wpanel = KPanel(self)
         self.picpanel = PicPanel(self)
-        self.ctrlpanel = CtrlPanel(self)
+        # self.ctrlpanel = CtrlPanel(self)
 
         self.topGroupBox = QGroupBox(self)
-        leftGroupBox = QGroupBox()
-        rightGroupBox = QGroupBox()
 
-        mlayout = QHBoxLayout()
-        mlayoutleft = QHBoxLayout()
-        mlayoutright = QHBoxLayout()
+        mlayout = QVBoxLayout()
+        mlayout.addWidget(self.picpanel)
 
-        # mlayout.addWidget(self.wpanel)
-        # mlayout.addWidget(self.ctrlpanel)
-        # mlayoutleft.addWidget(self.wpanel)
-        mlayoutleft.addWidget(self.picpanel)
-
-        mlayoutright.addWidget(self.ctrlpanel)
-
-        leftGroupBox.setLayout(mlayoutleft)
-        leftGroupBox.setMinimumSize(600,600)
-        rightGroupBox.setLayout(mlayoutright)
-
-        mlayout.addWidget(leftGroupBox)
-        mlayout.addWidget(rightGroupBox)
 
 
         self.topGroupBox.setLayout(mlayout)
@@ -101,6 +87,20 @@ class KgoWindow(QMainWindow):
         fileMenu.addAction(self.newMenuAction(text='Open',slot=self.openFile))
         fileMenu.addAction(self.newMenuAction(text='Exit',icon=QIcon('exit24.png'),tip='Exit application',slot=self.close,shortcut='Ctrl+Q'))
         pass
+    def initToolBars(self):
+        self.toolbar = self.addToolBar('toolbar')
+        startAction = QAction( 'start', self)
+        exitAction = QAction( 'Exit', self)
+        exitAction = QAction( 'Exit', self)
+
+        startAction.setStatusTip('start a new')
+
+        exitAction.triggered.connect(qApp.quit)
+
+        self.toolbar.addAction(startAction)
+        self.toolbar.addAction(exitAction)
+
+    pass
 
     def initStatusBar(self):
         statusBar = self.statusBar()
