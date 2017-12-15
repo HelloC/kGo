@@ -9,7 +9,7 @@
 '''
 import sys
 from PyQt5.QtCore import QPoint, QPointF, QRect, Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMessageBox
 from PyQt5.QtGui import QIcon, QPainter, QColor, QPen, QBrush, QPixmap
 
 from src.GoEngine import GoEngine
@@ -177,16 +177,9 @@ class PicPanel(QWidget):
             painter.drawPixmap((tpoint[0] + 1) * self.interval - self.lastStepPixmap.size().width() / 2,
                                 (tpoint[1] + 1) * self.interval - self.lastStepPixmap.size().height() / 2,
                                 self.lastStepPixmap)
-
-
-
-
         pass
 
     def mouseReleaseEvent(self, cursor_event):
-        # print(cursor_event.pos())
-        # print('mouseReleaseEvent start')
-
         px, py = self.xyTorowcol(cursor_event.pos())
         # print('px:', px)
         # print('py:', py)
@@ -200,18 +193,20 @@ class PicPanel(QWidget):
             if self.goStonesEngine.move(px, py, mcolor, False) is True:
                 self.isBlack = not self.isBlack
                 self.update()
+            else:
+                QMessageBox.information(self,  # 使用infomation信息框
+                                        "K-Go",
+                                        "Warnning: Step Forbidden",
+                                        QMessageBox.Yes)
             pass
-        # print('mouseReleaseEvent end')
 
         pass
 
     def mouseMoveEvent(self,cursor_event):
-        # print('mouseMoveEvent: ', cursor_event.pos())
         px, py = self.xyTorowcol(cursor_event.pos())
         if px > 0 and py > 0:
             self.mousePos[0] = px
             self.mousePos[1] = py
-            # print('mousePos ', self.mousePos)
             self.update()
 
         pass
@@ -219,15 +214,9 @@ class PicPanel(QWidget):
     def xyTorowcol(self, pos):
         x = pos.x()
         y = pos.y()
-        # print('x:', x)
-        # print('y:', y)
 
         px = self.calPointOne(x)
         py = self.calPointOne(y)
-
-        # print('xyTorowcol px:', px)
-        # print('xyTorowcol py:', py)
-
 
         if px is not None and py is not None:
             if px <=0:
@@ -240,7 +229,6 @@ class PicPanel(QWidget):
                 py=19
             return px, py
         else:
-            # print('xyTorowcol None:')
             return -1, -1
 
         pass
@@ -248,11 +236,6 @@ class PicPanel(QWidget):
     def calPointOne(self, p):
         m = p // self.interval
         n = p % self.interval
-        # print('m:', m)
-        # print('n:', n)
-
-        # if m <= 0 or m >= 19:
-            # return None
 
         if (n < self.interval * 0.5):
             ret = m

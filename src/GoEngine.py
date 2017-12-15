@@ -17,16 +17,16 @@ from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 class GoEngine():
     def __init__(self, board=19):
         # stones = [[[] for i in range(board)] for i in range(board)]
-        # x,y,color-w,b,e,status-visited or not
+        # x,y,color-w,b,e,status-visited or not, status-isLive(d)
         self.board = board
         self.stones = [[0 for i in range(board)] for i in range(board)]
         for i in range(board):
             for j in range(board):
-                self.stones[i][j] = [i, j, 'e', False]
+                self.stones[i][j] = [i, j, 'e', False, False]
                 pass
             pass
         self.stepsList = []
-        self.deadstones = []
+        self.deadstoneslist = []
         # print(self.stones)
 
         pass
@@ -54,6 +54,7 @@ class GoEngine():
 
         self.stones[px][py][2] = color
         self.stones[px][py][3] = status
+        self.stones[px][py][4] = True
 
         # print('move stone:', self.stones[px][py])
 
@@ -65,6 +66,8 @@ class GoEngine():
 
         self.doClearStatus()
         # print('do move end ret=',ret)
+        if not ret:
+            self.stepsList.pop()
 
         return ret
         pass
@@ -78,133 +81,104 @@ class GoEngine():
         pass
 
     def reFreshStone(self, stone):
-        # self.findFiberty(stone)
-        # if self.doStonesUpdate(stone):
-        if not self.isHasDeadStonesAround(stone):
-            if self.isStoneDead(stone):
-                return False
-        return True
-
-        pass
-    def isStoneDead(self, stone):
-        print('doStonesUpdate itself')
-        isLivestone = self.doDeadStoneCheck(stone)
+        deadstones= self.doCheckStoneAround(stone)
         self.doClearStatus()
-        print('isLivestone ', isLivestone)
+        for st in deadstones:
+            if st:
+                self.collectDeadStoneList(st)
+                self.doClearStatus()
+        self.updateStepList()
 
-        if not isLivestone:
-            self.deadstones.append(stone)
-            self.doDeadStonesCollect(stone)
-        return isLivestone
-
-    def isHasDeadStonesAround(self, stone):
-        left = self.getLeftStone(stone)
-        right = self.getRightStone(stone)
-        up = self.getUpStone(stone)
-        down = self.getDownStone(stone)
-
-        if left and left[2] is not 'e' and left[2] is not stone[2]:
-            isLivestone=self.doDeadStoneCheck(left)
+        status = self.isStoneLive(stone)
+        self.doClearStatus()
+        if not status:
+            self.collectDeadStoneList(stone)
             self.doClearStatus()
-            if not isLivestone:
-                self.deadstones.append(left)
-                self.doDeadStonesCollect(left)
-
-        if right and right[2] is not 'e' and  right[2] is not stone[2]:
-            isLivestone=self.doDeadStoneCheck(right)
-            self.doClearStatus()
-            if not isLivestone:
-                self.deadstones.append(right)
-                self.doDeadStonesCollect(right)
-
-        if up and up[2] is not 'e' and  up[2] is not stone[2]:
-            isLivestone=self.doDeadStoneCheck(up)
-            self.doClearStatus()
-            if not isLivestone:
-                self.deadstones.append(up)
-                self.doDeadStonesCollect(up)
-
-        if down and down[2] is not 'e' and  down[2] is not stone[2]:
-            isLivestone=self.doDeadStoneCheck(down)
-            self.doClearStatus()
-            if not isLivestone:
-                self.deadstones.append(down)
-                self.doDeadStonesCollect(down)
-                pass
-            pass
-        if self.deadstones is None:
+            self.updateStepList()
             return False
 
-        for item in self.deadstones:
-            item[2] = 'e'
-
-        self.deadstones = []
         return True
         pass
-
-
-
-
-
-
-    def doDeadStonesCollect(self,stone):
-        stone[3] = True
-        left = self.getLeftStone(stone)
-        if left and left[2] is stone[2] and not left[3]:
-            left[3]=True
-            self.deadstones.append(left)
-            self.doDeadStonesCollect(left)
-
-        right = self.getRightStone(stone)
-        if right and right[2] is stone[2] and not right[3]:
-            right[3]=True
-            self.deadstones.append(right)
-            self.doDeadStonesCollect(right)
-
-        up = self.getUpStone(stone)
-        if up and up[2] is stone[2] and not up[3]:
-            up[3]=True
-            self.deadstones.append(up)
-            self.doDeadStonesCollect(up)
-        down = self.getDownStone(stone)
-        if down and down[2] is stone[2] and not down[3]:
-            down[3]=True
-            self.deadstones.append(down)
-            self.doDeadStonesCollect(down)
+    def updateStepList(self):
+        for st in self.deadstoneslist:
+            st[2]='e'
+            st[4] = False
+        self.deadstoneslist=[]
 
         pass
 
-    def doDeadStoneCheck(self, stone):
-        stone[3]=True
-
-        left = self.getLeftStone(stone)
-        if left and left[2] is 'e':
-            return True
-        right = self.getRightStone(stone)
-        if right and right[2] is 'e':
-            return True
-        up = self.getUpStone(stone)
-        if up and up[2] is 'e':
-            return True
-        down = self.getDownStone(stone)
-        if down and down[2] is 'e':
-            return True
-
-        if left and left[2] is stone[2] and not left[3]:
-            return self.doDeadStoneCheck(left)
+    def doCheckStoneAround(self,stone):
+        deadaround =[]
+        around = self.getPointAroundHasDiffColor(stone)
+        for st in around:
+            if st :
+                if not self.isStoneLive(st):
+                    deadaround.append(st)
+        return deadaround
 
 
-        if right and right[2] is stone[2] and not right[3]:
-            return self.doDeadStoneCheck(right)
-
-        if up and up[2] is stone[2] and not up[3]:
-            return self.doDeadStoneCheck(up)
-
-        if down and down[2] is stone[2] and not down[3]:
-            return self.doDeadStoneCheck(down)
+    def isStoneLive(self, stone):
+        print('isStoneLive ', stone)
+        stone[3] = True
+        stone[4] = False
+        around = self.getPointAround(stone)
+        # print('around ', around)
+        for st in around:
+            if st :
+                if st[2] is 'e':
+                    return True
+                elif st[2] is stone[2] and not st[3]:
+                    if self.isStoneLive(st):
+                        return True
 
         return False
         pass
+    def collectDeadStoneList(self,stone):
+        # print('collectDeadStoneList start')
+        self.deadstoneslist.append(stone)
+        stone[3]=True
+        around = self.getPointAroundHasSameColor(stone)
+        # print('around ', around)
+        for st in around:
+            if st :
+                if st[2] is stone[2] and not st[3]:
+                    self.collectDeadStoneList(st)
+        # print('collectDeadStoneList end')
+
+    def getPointAround(self, stone):
+        up = self.getUpStone(stone)
+        down = self.getDownStone(stone)
+        left = self.getLeftStone(stone)
+        right = self.getRightStone(stone)
+
+        return [up, down, left, right]
+    def getPointAroundHasSameColor(self, stone):
+        retlist = []
+        up = self.getUpStone(stone)
+        down = self.getDownStone(stone)
+        left = self.getLeftStone(stone)
+        right = self.getRightStone(stone)
+
+        for st in [up, down, left, right]:
+            if st and st[2] is stone[2]:
+                retlist.append(st)
+
+        return retlist
+
+    def getPointAroundHasDiffColor(self, stone):
+        retlist = []
+        up = self.getUpStone(stone)
+        down = self.getDownStone(stone)
+        left = self.getLeftStone(stone)
+        right = self.getRightStone(stone)
+
+        for st in [up, down, left, right]:
+            if st and st[2] is not stone[2] and st[2] is not 'e':
+                retlist.append(st)
+
+        return retlist
+
+
 
     def getLeftStone(self, stone):
         # print('getLeftStone: ', stone)
