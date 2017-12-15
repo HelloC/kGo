@@ -170,11 +170,11 @@ class PicPanel(QWidget):
 
     def mouseReleaseEvent(self, cursor_event):
         # print(cursor_event.pos())
-        print('\n mouseReleaseEvent start')
+        # print('mouseReleaseEvent start')
 
         px, py = self.xyTorowcol(cursor_event.pos())
-        print('px:', px)
-        print('py:', py)
+        # print('px:', px)
+        # print('py:', py)
 
         if px > 0 and py > 0:
             if self.isBlack is True:

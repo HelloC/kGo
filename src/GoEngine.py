@@ -32,6 +32,7 @@ class GoEngine():
         pass
 
     def move(self, x, y, color='e', status=False):
+
         print("move ",x, ' ', y, " ", color, ' ', status)
         px = x-1
         py = y-1
@@ -41,18 +42,18 @@ class GoEngine():
         self.stones[px][py][2] = color
         self.stones[px][py][3] = status
 
-        print('move stone:', self.stones[px][py])
+        # print('move stone:', self.stones[px][py])
 
-        print('do self.stepsList.append')
+        # print('do self.stepsList.append')
         self.stepsList.append(self.stones[px][py])
 
-        print('do reFreshStone')
-        self.reFreshStone(self.stones[px][py])
+        # print('do reFreshStone')
+        ret = self.reFreshStone(self.stones[px][py])
 
         self.doClearStatus()
-        print('do move end')
+        print('do move end ret=',ret)
 
-        return True
+        return ret
         pass
     def getStepsLists(self):
         # print("getStepsLists: ",self.stepsList)
@@ -65,14 +66,14 @@ class GoEngine():
 
     def reFreshStone(self, stone):
         # self.findFiberty(stone)
-        if self.doStonesUpdate(stone):
-            self.doStonesUpdateAround(stone)
-        for item in self.deadstones:
-            item[2] = 'e'
+        # if self.doStonesUpdate(stone):
+        if not self.isHasDeadStonesAround(stone):
+            if self.isStoneDead(stone):
+                return False
+        return True
 
-        self.deadstones = []
         pass
-    def doStonesUpdate(self,stone):
+    def isStoneDead(self, stone):
         print('doStonesUpdate itself')
         isLivestone = self.doDeadStoneCheck(stone)
         self.doClearStatus()
@@ -83,7 +84,7 @@ class GoEngine():
             self.doDeadStonesCollect(stone)
         return isLivestone
 
-    def doStonesUpdateAround(self,stone):
+    def isHasDeadStonesAround(self, stone):
         left = self.getLeftStone(stone)
         right = self.getRightStone(stone)
         up = self.getUpStone(stone)
@@ -116,6 +117,17 @@ class GoEngine():
             if not isLivestone:
                 self.deadstones.append(down)
                 self.doDeadStonesCollect(down)
+                pass
+            pass
+        if self.deadstones is None:
+            return False
+
+        for item in self.deadstones:
+            item[2] = 'e'
+
+        self.deadstones = []
+        return True
+        pass
 
 
 
