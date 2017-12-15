@@ -26,8 +26,8 @@ class KgoWindow(QMainWindow):
         self.title = 'K-Go'
         self.left = 400
         self.top = 400
-        self.width = 880
-        self.height = 900
+        self.width = 820
+        self.height = 880
         self.setMinimumSize(self.width, self.height)
         self.setMaximumSize(self.width, self.height)
 
@@ -63,12 +63,8 @@ class KgoWindow(QMainWindow):
         # self.ctrlpanel = CtrlPanel(self)
 
         self.topGroupBox = QGroupBox(self)
-
         mlayout = QVBoxLayout()
         mlayout.addWidget(self.picpanel)
-
-
-
         self.topGroupBox.setLayout(mlayout)
         # self.setLayout(self.mlayout)
 
@@ -89,18 +85,29 @@ class KgoWindow(QMainWindow):
         pass
     def initToolBars(self):
         self.toolbar = self.addToolBar('toolbar')
-        startAction = QAction( 'start', self)
+        startAction = QAction( 'new', self)
+        backAction = QAction( 'back', self)
         exitAction = QAction( 'Exit', self)
-        exitAction = QAction( 'Exit', self)
+
 
         startAction.setStatusTip('start a new')
 
+        startAction.triggered.connect(self.doStartAction)
+        backAction.triggered.connect(self.doBackStepAction)
         exitAction.triggered.connect(qApp.quit)
 
         self.toolbar.addAction(startAction)
+        self.toolbar.addAction(backAction)
         self.toolbar.addAction(exitAction)
 
+
     pass
+
+    def doStartAction(self):
+        self.picpanel.newPanel()
+
+    def doBackStepAction(self):
+        self.picpanel.stepBackLastOne()
 
     def initStatusBar(self):
         statusBar = self.statusBar()

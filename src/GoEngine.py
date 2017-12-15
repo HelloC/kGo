@@ -31,12 +31,25 @@ class GoEngine():
 
         pass
 
+    def newGo(self):
+        for t in self.stepsList:
+            t[2] = 'e'
+        self.stepsList = []
+        pass
+    def stepPopLastOne(self):
+        if self.stepsList:
+            t = self.stepsList.pop()
+            t[2] = 'e'
+        pass
+
+
     def move(self, x, y, color='e', status=False):
 
-        print("move ",x, ' ', y, " ", color, ' ', status)
+        # print("move ",x, ' ', y, " ", color, ' ', status)
         px = x-1
         py = y-1
         if self.stones[px][py][2] is 'b' or self.stones[px][py][2] is 'w':
+            print('do move return False')
             return False
 
         self.stones[px][py][2] = color
@@ -51,7 +64,7 @@ class GoEngine():
         ret = self.reFreshStone(self.stones[px][py])
 
         self.doClearStatus()
-        print('do move end ret=',ret)
+        # print('do move end ret=',ret)
 
         return ret
         pass

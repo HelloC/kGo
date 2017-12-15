@@ -1,13 +1,14 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, Qt
 
 
 class App(QWidget):
 
     def __init__(self):
         super().__init__()
+        # self.setWindowFlags(Qt.FramelessWindowHint)
         self.title = 'PyQt5 button - pythonspot.com'
         self.left = 100
         self.top = 100
@@ -34,13 +35,9 @@ class App(QWidget):
     def on_click(self):
         print('PyQt5 button click')
         print('list1 ', self.list1)
-        print('list2 ', self.list2)
-        self.list2.append(self.list1[1])
-        print('list1 ', self.list1)
-        print('list2 ', self.list2)
-        self.list2[0][1]='h'
-        print('list1 ', self.list1)
-        print('list2 ', self.list2)
+        item = self.list1.pop()
+        print('item ', item)
+
 
 
 if __name__ == '__main__':

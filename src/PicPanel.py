@@ -18,6 +18,8 @@ from src.GoEngine import GoEngine
 class PicPanel(QWidget):
     def __init__(self, *args, **kwargs):
         super(PicPanel, self).__init__(*args, **kwargs)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setMouseTracking(True)
         self.boardWidth = 800
         self.boardHeight = 800
 
@@ -25,8 +27,8 @@ class PicPanel(QWidget):
         self.setMinimumSize(self.boardWidth, self.boardHeight)
 
         self.mboardsize = 19
-
         self.isBlack = True
+        self.mousePos=[10,10]
 
         self.chosen_points = []
         self.initUI()
@@ -65,19 +67,16 @@ class PicPanel(QWidget):
         self.bdPixmap = QPixmap('src\\resource\\image\\board.png')
         self.blPixmap = QPixmap('src\\resource\\image\\black.png')
         self.wtPixmap = QPixmap('src\\resource\\image\\white.png')
+        self.posPixmap = QPixmap('src\\resource\\image\\pos.png')
+        self.lastStepPixmap = QPixmap('src\\resource\\image\\square.gif')
 
         self.transToQuadrate(self.bdPixmap)
         self.transToQuadrate(self.blPixmap)
         self.transToQuadrate(self.wtPixmap)
 
-        # print('bdPixmap', self.bdPixmap)
-        # print(self.bdPixmap.size().width())
+
 
         radio = self.boardWidth / self.bdPixmap.size().width() * 0.8
-
-        # width = int(self.blPixmap.size().width() * radio)
-        # height = int(self.blPixmap.size().height() * radio)
-        # print(width, " ", height)
 
         self.boardPixmap = self.bdPixmap.scaled(self.boardWidth, self.boardHeight, Qt.KeepAspectRatio)
         # self.blackPixmap = self.blPixmap.scaled(width, height, Qt.KeepAspectRatio)
@@ -85,6 +84,15 @@ class PicPanel(QWidget):
         self.reCalculateGoImage()
 
         pass
+
+    def newPanel(self):
+        self.isBlack = True
+        self.goStonesEngine.newGo()
+        self.update()
+    def stepBackLastOne(self):
+        self.goStonesEngine.stepPopLastOne()
+        self.isBlack = not self.isBlack
+        self.update()
 
     def reCalculateGoImage(self):
         radio = self.interval * 0.9
@@ -107,24 +115,19 @@ class PicPanel(QWidget):
         painter.setRenderHint(QPainter.Antialiasing, True)
         self.drawBoard(painter)
         self.drawPanelLines(painter)
-        self.reCalculateGoImage()
         self.drawPoints(painter)
+        self.drawMousePos(painter)
 
     def drawBoard(self, painter):
         painter.drawPixmap(self.rect(), self.boardPixmap)
         pass
 
     def drawPanelLines(self, painter):
-        # lenght = self.width if self.width < self.height else self.height
 
         linecolor = QColor(70, 70, 70)
 
         # draw lines
         painter.setPen(QPen(linecolor, 2))
-
-        # print('lenght: ', lenght)
-        # print('padding: ', padding)
-        # print('interval: ', interval)
 
         for x in range(self.padding, (self.mboardsize) * self.interval + self.padding, self.interval):
             painter.drawLine(x, self.padding, x, (self.mboardsize - 1) * self.interval + self.padding)
@@ -146,6 +149,11 @@ class PicPanel(QWidget):
             pass
         pass
 
+    def drawMousePos(self, painter):
+        painter.drawPixmap((self.mousePos[0]) * self.interval - self.posPixmap.size().width() / 2,
+                           (self.mousePos[1]) * self.interval - self.posPixmap.size().height() / 2,
+                               self.posPixmap)
+
     def drawPoints(self, painter):
         # painter.setPen(QPen())
         # print('drawPoints -->')
@@ -162,9 +170,16 @@ class PicPanel(QWidget):
                                    self.whitePixmap)
             else:
                 pass
-
-
             pass
+        tpointlist=self.goStonesEngine.getStepsLists()
+        if tpointlist:
+            tpoint = tpointlist[-1]
+            painter.drawPixmap((tpoint[0] + 1) * self.interval - self.lastStepPixmap.size().width() / 2,
+                                (tpoint[1] + 1) * self.interval - self.lastStepPixmap.size().height() / 2,
+                                self.lastStepPixmap)
+
+
+
 
         pass
 
@@ -184,10 +199,20 @@ class PicPanel(QWidget):
                 pass
             if self.goStonesEngine.move(px, py, mcolor, False) is True:
                 self.isBlack = not self.isBlack
-            pass
-            self.update()
+                self.update()
             pass
         # print('mouseReleaseEvent end')
+
+        pass
+
+    def mouseMoveEvent(self,cursor_event):
+        # print('mouseMoveEvent: ', cursor_event.pos())
+        px, py = self.xyTorowcol(cursor_event.pos())
+        if px > 0 and py > 0:
+            self.mousePos[0] = px
+            self.mousePos[1] = py
+            # print('mousePos ', self.mousePos)
+            self.update()
 
         pass
 
@@ -203,10 +228,19 @@ class PicPanel(QWidget):
         # print('xyTorowcol px:', px)
         # print('xyTorowcol py:', py)
 
+
         if px is not None and py is not None:
+            if px <=0:
+                px = 0
+            elif px >= 19:
+                px = 19;
+            if py <= 0:
+                py=0
+            elif py >=19:
+                py=19
             return px, py
         else:
-            print('xyTorowcol None:')
+            # print('xyTorowcol None:')
             return -1, -1
 
         pass
@@ -217,8 +251,8 @@ class PicPanel(QWidget):
         # print('m:', m)
         # print('n:', n)
 
-        if m <= 0 or m >= 19:
-            return None
+        # if m <= 0 or m >= 19:
+            # return None
 
         if (n < self.interval * 0.5):
             ret = m
@@ -226,7 +260,7 @@ class PicPanel(QWidget):
             ret = (m + 1)
             pass
         else:
-            print('re press')
+            # print('re press')
             ret = None
             pass
         return ret
