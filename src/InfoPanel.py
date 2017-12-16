@@ -25,8 +25,8 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QPushButton, QGridL
 
 
 class PersonView(QWidget):
-    def __init__(self):
-        super(PersonView, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(PersonView, self).__init__(*args, **kwargs)
         self.initUI()
         # self.setGeometry(100,100,480,320)
         self.show()
@@ -92,8 +92,8 @@ class InfoPanel(QWidget):
         groupBox = QGroupBox(self)
 
         mlayout = QHBoxLayout(self)
-        self.black = PersonView()
-        self.white = PersonView()
+        self.black = PersonView(self)
+        self.white = PersonView(self)
         mlayout.addWidget(self.black)
         mlayout.addWidget(self.white)
 
