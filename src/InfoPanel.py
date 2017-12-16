@@ -94,6 +94,7 @@ class InfoPanel(QWidget):
         mlayout = QHBoxLayout(self)
         self.black = PersonView(self)
         self.white = PersonView(self)
+        self.white.setPersonStone('white')
         mlayout.addWidget(self.black)
         mlayout.addWidget(self.white)
 
