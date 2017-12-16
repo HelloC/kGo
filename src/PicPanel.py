@@ -116,6 +116,7 @@ class PicPanel(QWidget):
         painter.setRenderHint(QPainter.Antialiasing, True)
         self.drawBoard(painter)
         self.drawPanelLines(painter)
+        self.drawNum(painter)
         self.drawPoints(painter)
         self.drawMousePos(painter)
 
@@ -143,6 +144,17 @@ class PicPanel(QWidget):
                                     self.interval * 0.2)
 
             pass
+        pass
+    def drawNum(self, painter):
+        color = QColor(30, 30, 240)
+        painter.setPen(QPen(color, 2))
+        for i in range(19):
+                painter.drawText(self.padding+self.interval*i-2, self.padding*0.9, str(i+1))
+                painter.drawText(self.padding+self.interval*i-2, self.padding*(1.3)+self.interval*18, str(i+1))
+        for i in range(19):
+                painter.drawText(self.padding*0.7, self.padding+self.interval*i+3, chr(i+65))
+                painter.drawText(self.padding*(1.2)+self.interval*18, self.padding+self.interval*i+3, chr(i+65))
+
         pass
 
     def drawMousePos(self, painter):
