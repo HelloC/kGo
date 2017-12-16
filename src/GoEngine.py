@@ -7,12 +7,19 @@
  Licence: 
  
 '''
+from enum import Enum
+
 import numpy as np
 import sys
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtMultimedia import QSound
 from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
+
+class WorkMode(Enum):
+    SGF=1
+    Fight=2
+    Study=3
 
 
 class GoEngine():
@@ -23,24 +30,24 @@ class GoEngine():
         self.stones = [[0 for i in range(board)] for i in range(board)]
         for i in range(board):
             for j in range(board):
-                self.stones[i][j] = [i, j, 'e', False, False]
+                self.stones[i][j] = [i, j, 'empty', False, False]
                 pass
             pass
         self.stepsList = []
         self.deadstoneslist = []
-        # print(self.stones)
+
+        # mode: sgf,fight,study
+        self.workMode = WorkMode.Study
+        self.sgfFile = None
+
         self.initAudio()
+
         pass
 
     def newGo(self):
         for t in self.stepsList:
-            t[2] = 'e'
+            t[2] = 'empty'
         self.stepsList = []
-        pass
-    def stepPopLastOne(self):
-        if self.stepsList:
-            t = self.stepsList.pop()
-            t[2] = 'e'
         pass
 
     def initAudio(self):
@@ -49,29 +56,65 @@ class GoEngine():
             'deadstone': QSound('src\\resource\\sound\\deadstonemore.wav'),
 
         }
-    def move(self, x, y, color='e', status=False):
 
-        # print("move ",x, ' ', y, " ", color, ' ', status)
+    def stepPopLastOne(self):
+        if self.stepsList:
+            t = self.stepsList.pop()
+            t[2] = 'empty'
+            return True
+        return False
+        pass
+
+    def initSGF(self, file=None):
+        self.sgfFile=file
+        self.workMode=WorkMode.SGF
+        self.stepsList=[]
+        pass
+
+    def goStartStep(self):
+        for stone in self.stepsList:
+            stone[2] = 'empty'
+        self.stepsList=[]
+        pass
+    def goEndStep(self):
+        pass
+    def goNextStep(self):
+        pass
+    def goNextNodeStep(self):
+        pass
+    def goPreStep(self):
+        self.stepPopLastOne()
+        pass
+    def goPreNodeStep(self):
+        for i in range(5):
+            self.stepPopLastOne()
+            pass
+        pass
+
+
+
+    def move(self, x, y, color='empty', status=False):
         px = x-1
         py = y-1
-        if self.stones[px][py][2] is 'b' or self.stones[px][py][2] is 'w':
+        if self.stones[px][py][2] is 'black' or self.stones[px][py][2] is 'white':
             print('do move return False')
             return False
+        if color is not None:
+            self.stones[px][py][2] = color
+        else:
+            if not self.stepsList:
+                self.stones[px][py][2]= 'black'
+            else:
+                self.stones[px][py][2] = 'white' if self.stepsList[-1][2] is 'black' else 'black'
 
-        self.stones[px][py][2] = color
         self.stones[px][py][3] = status
         self.stones[px][py][4] = True
 
-        # print('move stone:', self.stones[px][py])
-
-        # print('do self.stepsList.append')
         self.stepsList.append(self.stones[px][py])
 
-        # print('do reFreshStone')
         ret = self.reFreshStone(self.stones[px][py])
 
         self.doClearStatus()
-        # print('do move end ret=',ret)
         if not ret:
             self.stepsList.pop()
 
@@ -110,11 +153,9 @@ class GoEngine():
         pass
     def updateStepList(self):
         for st in self.deadstoneslist:
-            st[2]='e'
+            st[2]='empty'
             st[4] = False
         self.deadstoneslist=[]
-
-
         pass
 
     def doCheckStoneAround(self,stone):
@@ -135,7 +176,7 @@ class GoEngine():
         # print('around ', around)
         for st in around:
             if st :
-                if st[2] is 'e':
+                if st[2] is 'empty':
                     return True
                 elif st[2] is stone[2] and not st[3]:
                     if self.isStoneLive(st):
@@ -183,12 +224,10 @@ class GoEngine():
         right = self.getRightStone(stone)
 
         for st in [up, down, left, right]:
-            if st and st[2] is not stone[2] and st[2] is not 'e':
+            if st and st[2] is not stone[2] and st[2] is not 'empty':
                 retlist.append(st)
 
         return retlist
-
-
 
     def getLeftStone(self, stone):
         # print('getLeftStone: ', stone)
@@ -256,7 +295,7 @@ class App(QWidget):
     @pyqtSlot()
     def on_click(self):
         print('PyQt5 button click')
-        self.ge.move(1,1, 'b',True)
+        self.ge.move(1,1, 'black',True)
 
 
 if __name__ == '__main__':

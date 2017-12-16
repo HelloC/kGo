@@ -8,14 +8,19 @@
  
 '''
 import sys
-from PyQt5.QtCore import QPoint, QPointF, QRect, Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMessageBox
-from PyQt5.QtGui import QIcon, QPainter, QColor, QPen, QBrush, QPixmap
+from PyQt5.QtCore import QPointF, pyqtSignal, Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
+from PyQt5.QtGui import QIcon, QPainter, QColor, QPen,  QPixmap
 
 from src.GoEngine import GoEngine
 
 
+
+
+
 class PicPanel(QWidget):
+    sigUpdate = pyqtSignal()
+
     def __init__(self, *args, **kwargs):
         super(PicPanel, self).__init__(*args, **kwargs)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -27,39 +32,27 @@ class PicPanel(QWidget):
         self.setMinimumSize(self.boardWidth, self.boardHeight)
 
         self.mboardsize = 19
-        self.isBlack = True
         self.mousePos=[10,10]
 
-        self.chosen_points = []
+        self._goStonesEngine = GoEngine()
+
         self.initUI()
-        self.initDataEngine()
+        self.initSinalHandler()
+
         self.show()
         pass
 
-    def initDataEngine(self):
-        self.goStonesEngine = GoEngine()
-        pass
 
     def initUI(self):
-        # self.resize()
         self.initGoBoardSize()
-
         self.initGoImages()
-
-        # mlayout.addWidget(self.labelBoard)
-        # self.setLayout(mlayout)
         pass
 
     def initGoBoardSize(self):
         mlen = self.geometry().width() if self.geometry().width() < self.geometry().height() else self.geometry().height()
         # self.lenght = mlen if mlen <= 800 else 800
         self.lenght = mlen
-        # print('geometry ',self.geometry().width())
-        # print('geometry ',self.geometry().height())
-        # print('mboardsize ', self.mboardsize)
         self.interval = int(self.lenght * 0.9 // (self.mboardsize - 1))
-        # self.interval = 30
-        # print('interval: ', self.interval)
         self.padding = self.interval
         pass
 
@@ -74,25 +67,30 @@ class PicPanel(QWidget):
         self.transToQuadrate(self.blPixmap)
         self.transToQuadrate(self.wtPixmap)
 
-
-
         radio = self.boardWidth / self.bdPixmap.size().width() * 0.8
-
         self.boardPixmap = self.bdPixmap.scaled(self.boardWidth, self.boardHeight, Qt.KeepAspectRatio)
-        # self.blackPixmap = self.blPixmap.scaled(width, height, Qt.KeepAspectRatio)
-        # self.whitePixmap = self.wtPixmap.scaled(width, height, Qt.KeepAspectRatio)
         self.reCalculateGoImage()
-
         pass
+    def initSinalHandler(self):
+        self.sigUpdate.connect(self.sigUpdateHandler)
 
     def newPanel(self):
-        self.isBlack = True
         self.goStonesEngine.newGo()
         self.update()
+
     def stepBackLastOne(self):
-        self.goStonesEngine.stepPopLastOne()
-        self.isBlack = not self.isBlack
-        self.update()
+        if self.goStonesEngine.stepPopLastOne():
+            self.update()
+            return True
+        False
+
+    @property
+    def goStonesEngine(self):
+        return self._goStonesEngine
+    @goStonesEngine.setter
+    def goStonesEngine(self,val):
+        self._goStonesEngine=val
+
 
     def reCalculateGoImage(self):
         radio = self.interval * 0.9
@@ -107,6 +105,9 @@ class PicPanel(QWidget):
             pixmap.scaled(pixmap.size().width(), pixmap.size().width())
             pass
         pass
+
+    def sigUpdateHandler(self):
+        self.update()
 
     def paintEvent(self, QPaintEvent):
 
@@ -123,9 +124,7 @@ class PicPanel(QWidget):
         pass
 
     def drawPanelLines(self, painter):
-
         linecolor = QColor(70, 70, 70)
-
         # draw lines
         painter.setPen(QPen(linecolor, 2))
 
@@ -138,14 +137,11 @@ class PicPanel(QWidget):
         # draw star
         painter.setBrush(linecolor)
         for i in [3, 9, 15]:
-            # print('i: ', i)
             for j in [3, 9, 15]:
                 painter.drawEllipse(QPointF(self.padding + self.interval * i, self.padding + self.interval * j),
                                     self.interval * 0.2,
                                     self.interval * 0.2)
 
-            # painter.drawEllipse(QPointF(padding+interval*3, padding+interval*10), interval*0.2, interval*0.2)
-            # painter.drawEllipse(QPointF(padding+interval*3, padding+interval*16), interval*0.2, interval*0.2)
             pass
         pass
 
@@ -155,16 +151,13 @@ class PicPanel(QWidget):
                                self.posPixmap)
 
     def drawPoints(self, painter):
-        # painter.setPen(QPen())
-        # print('drawPoints -->')
         for tpoint in self.goStonesEngine.getStepsLists():
-            # print('tpoint:', tpoint)
 
-            if tpoint[2] is 'b':
+            if tpoint[2] is 'black':
                 painter.drawPixmap((tpoint[0] + 1) * self.interval - self.blackPixmap.size().width() / 2,
                                    (tpoint[1] + 1) * self.interval - self.blackPixmap.size().height() / 2,
                                    self.blackPixmap)
-            elif tpoint[2] is 'w':
+            elif tpoint[2] is 'white':
                 painter.drawPixmap((tpoint[0] + 1) * self.interval - self.blackPixmap.size().width() / 2,
                                    (tpoint[1] + 1) * self.interval - self.blackPixmap.size().height() / 2,
                                    self.whitePixmap)
@@ -181,23 +174,17 @@ class PicPanel(QWidget):
 
     def mouseReleaseEvent(self, cursor_event):
         px, py = self.xyTorowcol(cursor_event.pos())
-        # print('px:', px)
-        # print('py:', py)
 
         if px > 0 and py > 0:
-            if self.isBlack is True:
-                mcolor = 'b'
-            else:
-                mcolor = 'w'
-                pass
-            if self.goStonesEngine.move(px, py, mcolor, False) is True:
-                self.isBlack = not self.isBlack
+            if self.goStonesEngine.move(px, py, None, False) is True:
                 self.update()
             else:
-                QMessageBox.information(self,  # 使用infomation信息框
+                mMBox=QMessageBox()
+                mMBox.setIcon(QIcon('src\\resource\\image\\unhappy.png'))
+                mMBox.information(self,
                                         "K-Go",
                                         "Warnning: Step Forbidden",
-                                        QMessageBox.Yes)
+                                        QMessageBox.Ok)
             pass
 
         pass

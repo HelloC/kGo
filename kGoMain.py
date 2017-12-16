@@ -7,17 +7,18 @@
  Licence: 
  
 '''
-import PyQt5
 
 import sys
 
-from PyQt5.QtCore import Qt, QMargins
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from src import kGoSGFparser
+from src.InfoPanel import InfoPanel
 from src.PicPanel import PicPanel
+import src.kGoSGFparser
 from src.ctrlPanel import CtrlPanel
-from src.kPanel import KPanel
 
 
 class KgoWindow(QMainWindow):
@@ -28,8 +29,8 @@ class KgoWindow(QMainWindow):
         self.top = 400
         self.width = 820
         self.height = 880
-        self.setMinimumSize(self.width, self.height)
-        self.setMaximumSize(self.width, self.height)
+        # self.setMinimumSize(self.width, self.height)
+        # self.setMaximumSize(self.width, self.height)
 
 
         self.initUI()
@@ -40,6 +41,7 @@ class KgoWindow(QMainWindow):
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setWindowIcon(QIcon('src\\resource\\image\\app.ico'))
 
         self.initMenu()
         self.initStatusBar()
@@ -60,14 +62,35 @@ class KgoWindow(QMainWindow):
     def initWinLayout(self):
         # self.wpanel = KPanel(self)
         self.picpanel = PicPanel(self)
+        self.infopanel = InfoPanel(self)
         # self.ctrlpanel = CtrlPanel(self)
 
         self.topGroupBox = QGroupBox(self)
-        mlayout = QVBoxLayout()
-        mlayout.addWidget(self.picpanel)
-        self.topGroupBox.setLayout(mlayout)
-        # self.setLayout(self.mlayout)
 
+        picGroupBox = QGroupBox(self)
+        mVlayout = QVBoxLayout()
+        # mVlayout = QGridLayout()
+        # mVlayout.addWidget(self.picpanel, 0,0, 1, 5)
+        # mVlayout.addWidget(self.ctrlpanel, 1,2, 1,1)
+        mVlayout.addWidget(self.picpanel)
+        picGroupBox.setLayout(mVlayout)
+
+        infogbox = QGroupBox(self)
+        mVlayout = QVBoxLayout()
+        mVlayout.addWidget(self.infopanel)
+        mVlayout.addStretch(1)
+        infogbox.setLayout(mVlayout)
+
+        # mlayout = QHBoxLayout()
+        # mlayout.addWidget(self.picpanel)
+        # mlayout.addWidget(self.ctrlpanel)
+
+        # self.setLayout(self.mlayout)
+        mgridLayout = QGridLayout()
+        mgridLayout.addWidget(picGroupBox, 0, 0)
+        mgridLayout.addWidget(infogbox, 0, 1)
+        # self.setLayout(mgridLayout)
+        self.topGroupBox.setLayout(mgridLayout)
 
 
     def initMenu(self):
@@ -80,34 +103,74 @@ class KgoWindow(QMainWindow):
         setMenu = mainMenu.addMenu('Setting')
         helpMenu = mainMenu.addMenu('Help')
 
-        fileMenu.addAction(self.newMenuAction(text='Open',slot=self.openFile))
+        fileMenu.addAction(self.newMenuAction(text='Open', slot=self.doOpenFileAction))
         fileMenu.addAction(self.newMenuAction(text='Exit',icon=QIcon('exit24.png'),tip='Exit application',slot=self.close,shortcut='Ctrl+Q'))
         pass
     def initToolBars(self):
-        self.toolbar = self.addToolBar('toolbar')
-        startAction = QAction( 'new', self)
-        backAction = QAction( 'back', self)
-        exitAction = QAction( 'Exit', self)
 
+        self.mTBarFile = self.addToolBar('FileBar')
+        FileBarList = [('Open', QIcon('src\\resource\\image\\open.png'), 'Open SGF File', self.doOpenFileAction),
+                       ('Open', QIcon('src\\resource\\image\\page_save.png'), 'Save SGF File', self.doSaveFileAction),
+                       ]
+        for item in FileBarList:
+            act = QAction(item[0], self)
+            act.setIcon(item[1])
+            act.setToolTip(item[2])
+            act.triggered.connect(item[3])
+            self.mTBarFile.addAction(act)
 
-        startAction.setStatusTip('start a new')
+        self.mTbarBoard = self.addToolBar('BoardBar')
+        BoardBarList = [('New',     QIcon('src\\resource\\image\\new.png'),     'Create A Board',   self.doNewAction),
+                       ('start',    QIcon('src\\resource\\image\\start.png'),   'Go start step',    self.doStartAction),
+                       ('PreTen',   QIcon('src\\resource\\image\\preten.png'),  'Pre Node step',     self.doPreNodeAction),
+                       ('Pre',      QIcon('src\\resource\\image\\pre.png'),     'Pre step',         self.doPreAction),
+                       ('next',     QIcon('src\\resource\\image\\next.png'),    'next step',        self.doNextAction),
+                       ('nextTen',  QIcon('src\\resource\\image\\nextten.png'), 'next Node step',    self.doNextNodeAction),
+                       ('end',      QIcon('src\\resource\\image\\end.png'),     'Go end step',      self.doEndAction)
+                       ]
 
-        startAction.triggered.connect(self.doStartAction)
-        backAction.triggered.connect(self.doBackStepAction)
-        exitAction.triggered.connect(qApp.quit)
-
-        self.toolbar.addAction(startAction)
-        self.toolbar.addAction(backAction)
-        self.toolbar.addAction(exitAction)
-
-
+        for item in BoardBarList:
+            act = QAction(item[0], self)
+            act.setIcon(item[1])
+            act.setToolTip(item[2])
+            act.triggered.connect(item[3])
+            self.mTbarBoard.addAction(act)
     pass
 
-    def doStartAction(self):
-        self.picpanel.newPanel()
+    def doNewAction(self):
+        mbox = QMessageBox.question(self,
+                       'K-Go',
+                       "Do you want to new a Board ?",
+                       QMessageBox.Yes | QMessageBox.Cancel,
+                       QMessageBox.Cancel)
 
-    def doBackStepAction(self):
-        self.picpanel.stepBackLastOne()
+        if mbox == QMessageBox.Yes:
+            self.picpanel.newPanel()
+
+    def doStartAction(self):
+        self.picpanel.goStonesEngine.goStartStep()
+        self.picpanel.sigUpdate.emit()
+        pass
+    def doPreAction(self):
+        self.picpanel.goStonesEngine.goPreStep()
+        self.picpanel.sigUpdate.emit()
+        pass
+    def doPreNodeAction(self):
+        self.picpanel.goStonesEngine.goPreNodeStep()
+        self.picpanel.sigUpdate.emit()
+
+    def doNextAction(self):
+        self.picpanel.goStonesEngine.goNextStep()
+        self.picpanel.sigUpdate.emit()
+        pass
+    def doNextNodeAction(self):
+        self.picpanel.goStonesEngine.goNextNodeStep()
+        self.picpanel.sigUpdate.emit()
+        pass
+    def doEndAction(self):
+        self.picpanel.goStonesEngine.goEndStep()
+        self.picpanel.sigUpdate.emit()
+        pass
 
     def initStatusBar(self):
         statusBar = self.statusBar()
@@ -130,11 +193,20 @@ class KgoWindow(QMainWindow):
 
         pass
 
-    def openFile(self):
-        fileName1, filetype = QFileDialog.getOpenFileName(self, "选取文件", "/Users/Kelisiya/Desktop",
-                                                          "All Files (*);;Text Files (*.txt)")
-        print(fileName1, filetype)
+    def doOpenFileAction(self):
+        fileName, filetype = QFileDialog.getOpenFileName(self,
+                                                          "Select A SGF File",
+                                                          "SGF",
+                                                          "SGF Files (*.sgf)")
+        print('fileName1', fileName)
+        print('filetype', filetype)
+        # self.picpanel.goStonesEngine.initSGF(fileName)
+        if fileName:
+            kGoSGFparser.openFile(fileName)
 
+    def doSaveFileAction(self):
+        print('doSaveFileAction -->')
+        pass
     pass
 
 
