@@ -60,7 +60,7 @@ class PicPanel(QWidget):
         self.bdPixmap = QPixmap('src\\resource\\image\\board.png')
         self.blPixmap = QPixmap('src\\resource\\image\\black.png')
         self.wtPixmap = QPixmap('src\\resource\\image\\white.png')
-        self.posPixmap = QPixmap('src\\resource\\image\\pos.png')
+        # self.posPixmap = QPixmap('src\\resource\\image\\pos.png')
         self.lastStepPixmap = QPixmap('src\\resource\\image\\square.gif')
 
         self.transToQuadrate(self.bdPixmap)
@@ -70,6 +70,7 @@ class PicPanel(QWidget):
         radio = self.boardWidth / self.bdPixmap.size().width() * 0.8
         self.boardPixmap = self.bdPixmap.scaled(self.boardWidth, self.boardHeight, Qt.KeepAspectRatio)
         self.reCalculateGoImage()
+
         pass
     def initSinalHandler(self):
         self.sigUpdate.connect(self.sigUpdateHandler)
@@ -96,6 +97,8 @@ class PicPanel(QWidget):
         radio = self.interval * 0.9
         self.blackPixmap = self.blPixmap.scaled(radio, radio, Qt.KeepAspectRatio)
         self.whitePixmap = self.wtPixmap.scaled(radio, radio, Qt.KeepAspectRatio)
+        self.posPixmapbl= self.blPixmap.scaled(radio/2, radio/2, Qt.KeepAspectRatio)
+        self.posPixmapwh= self.whitePixmap.scaled(radio/2, radio/2, Qt.KeepAspectRatio)
         pass
 
     def transToQuadrate(self, pixmap):
@@ -158,9 +161,23 @@ class PicPanel(QWidget):
         pass
 
     def drawMousePos(self, painter):
-        painter.drawPixmap((self.mousePos[0]) * self.interval - self.posPixmap.size().width() / 2,
-                           (self.mousePos[1]) * self.interval - self.posPixmap.size().height() / 2,
-                               self.posPixmap)
+        color = QColor(30, 240, 30)
+        painter.setPen(QPen(color, 1))
+        painter.drawLine(self.padding+(self.mousePos[0]-1)* self.interval, self.padding,
+                         self.padding + (self.mousePos[0] - 1) * self.interval,
+                         self.padding+(self.mboardsize-1)* self.interval)
+        painter.drawLine(self.padding , self.padding+(self.mousePos[1]-1)* self.interval,
+                         self.padding + (self.mboardsize - 1) * self.interval,
+                         self.padding + (self.mousePos[1] - 1) * self.interval)
+        tpointlist = self.goStonesEngine.getStepsLists()
+        if tpointlist and tpointlist[-1][2]  is 'black':
+                painter.drawPixmap((self.mousePos[0]) * self.interval - self.posPixmapwh.size().width() / 2,
+                                   (self.mousePos[1]) * self.interval - self.posPixmapwh.size().height() / 2,
+                                       self.posPixmapwh)
+        else:
+            painter.drawPixmap((self.mousePos[0]) * self.interval - self.posPixmapwh.size().width() / 2,
+                                   (self.mousePos[1]) * self.interval - self.posPixmapwh.size().height() / 2,
+                                       self.posPixmapbl)
 
     def drawPoints(self, painter):
         for tpoint in self.goStonesEngine.getStepsLists():
