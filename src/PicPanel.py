@@ -57,11 +57,11 @@ class PicPanel(QWidget):
         pass
 
     def initGoImages(self):
-        self.bdPixmap = QPixmap('src\\resource\\image\\board.png')
-        self.blPixmap = QPixmap('src\\resource\\image\\black.png')
-        self.wtPixmap = QPixmap('src\\resource\\image\\white.png')
+        self.bdPixmap = QPixmap('resource\\boards\\board.png')
+        self.blPixmap = QPixmap('resource\\stones\\black.png')
+        self.wtPixmap = QPixmap('resource\\stones\\white.png')
         # self.posPixmap = QPixmap('src\\resource\\image\\pos.png')
-        self.lastStepPixmap = QPixmap('src\\resource\\image\\square.gif')
+        self.lastStepPixmap = QPixmap('resource\\image\\square.gif')
 
         self.transToQuadrate(self.bdPixmap)
         self.transToQuadrate(self.blPixmap)

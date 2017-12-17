@@ -35,8 +35,8 @@ class PersonView(QWidget):
     def initUI(self):
         mlayout = QGridLayout(self)
 
-        self.blackpmap=QPixmap('src\\resource\\image\\black.gif')
-        self.whitepmap=QPixmap('src\\resource\\image\\white.gif')
+        self.blackpmap=QPixmap('resource\\image\\black.gif')
+        self.whitepmap=QPixmap('resource\\image\\white.gif')
 
         self.personstone = QLabel(self)
         # person.setScaledContents(True)

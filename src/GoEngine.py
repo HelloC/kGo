@@ -52,8 +52,8 @@ class GoEngine():
 
     def initAudio(self):
         self.maudios = {
-            'move': QSound('src\\resource\\sound\\move.wav'),
-            'deadstone': QSound('src\\resource\\sound\\deadstonemore.wav'),
+            'move': QSound('resource\\sound\\move.wav'),
+            'deadstone': QSound('resource\\sound\\deadstonemore.wav'),
 
         }
 

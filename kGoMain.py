@@ -41,7 +41,7 @@ class KgoWindow(QMainWindow):
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.setWindowIcon(QIcon('src\\resource\\image\\app.ico'))
+        self.setWindowIcon(QIcon('resource\\image\\app.ico'))
 
         self.initMenu()
         self.initStatusBar()
@@ -109,8 +109,8 @@ class KgoWindow(QMainWindow):
     def initToolBars(self):
 
         self.mTBarFile = self.addToolBar('FileBar')
-        FileBarList = [('Open', QIcon('src\\resource\\image\\open.png'), 'Open SGF File', self.doOpenFileAction),
-                       ('Open', QIcon('src\\resource\\image\\page_save.png'), 'Save SGF File', self.doSaveFileAction),
+        FileBarList = [('Open', QIcon('resource\\toolbar\\open.png'), 'Open SGF File', self.doOpenFileAction),
+                       ('Open', QIcon('resource\\toolbar\\page_save.png'), 'Save SGF File', self.doSaveFileAction),
                        ]
         for item in FileBarList:
             act = QAction(item[0], self)
@@ -120,13 +120,13 @@ class KgoWindow(QMainWindow):
             self.mTBarFile.addAction(act)
 
         self.mTbarBoard = self.addToolBar('BoardBar')
-        BoardBarList = [('New',     QIcon('src\\resource\\image\\new.png'),     'Create A Board',   self.doNewAction),
-                       ('start',    QIcon('src\\resource\\image\\start.png'),   'Go start step',    self.doStartAction),
-                       ('PreTen',   QIcon('src\\resource\\image\\preten.png'),  'Pre Node step',     self.doPreNodeAction),
-                       ('Pre',      QIcon('src\\resource\\image\\pre.png'),     'Pre step',         self.doPreAction),
-                       ('next',     QIcon('src\\resource\\image\\next.png'),    'next step',        self.doNextAction),
-                       ('nextTen',  QIcon('src\\resource\\image\\nextten.png'), 'next Node step',    self.doNextNodeAction),
-                       ('end',      QIcon('src\\resource\\image\\end.png'),     'Go end step',      self.doEndAction)
+        BoardBarList = [('New',     QIcon('resource\\toolbar\\new.png'),     'Create A Board',   self.doNewAction),
+                       ('start',    QIcon('resource\\toolbar\\start.png'),   'Go start step',    self.doStartAction),
+                       ('PreTen',   QIcon('resource\\toolbar\\prenode.png'),  'Pre Node step',     self.doPreNodeAction),
+                       ('Pre',      QIcon('resource\\toolbar\\pre.png'),     'Pre step',         self.doPreAction),
+                       ('next',     QIcon('resource\\toolbar\\next.png'),    'next step',        self.doNextAction),
+                       ('nextTen',  QIcon('resource\\toolbar\\nextnode.png'), 'next Node step',    self.doNextNodeAction),
+                       ('end',      QIcon('resource\\toolbar\\end.png'),     'Go end step',      self.doEndAction)
                        ]
 
         for item in BoardBarList:
