@@ -78,6 +78,7 @@ class PicPanel(QWidget):
 
 
 
+
     def newPanel(self):
         self.goStonesEngine.newGo()
         self.update()
@@ -224,6 +225,7 @@ class PicPanel(QWidget):
 
         if px > 0 and py > 0:
             if self.goStonesEngine.move(px, py, None, False) is True:
+                self.sigRepaint.emit(len(self.goStonesEngine.getStepsLists()))
                 self.update()
             pass
 
