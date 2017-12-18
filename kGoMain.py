@@ -65,6 +65,7 @@ class KgoWindow(QMainWindow):
         # self.wpanel = KPanel(self)
         self.picpanel = PicPanel(self)
         self.picpanel.sigRepaint.connect(self.doResponsePicPanelRepaint)
+        # self.picpanel.goStonesEngine.sigStepsNum.connect(self.doResponsePicPanelRepaint)
 
         self.infopanel = InfoPanel(self)
         # self.ctrlpanel = CtrlPanel(self)
@@ -184,8 +185,8 @@ class KgoWindow(QMainWindow):
         pass
 
     def initStatusBar(self):
-        statusBar = self.statusBar()
-        statusBar.showMessage('Message in statusbar.')
+        self.statusBar = self.statusBar()
+        self.statusBar.showMessage('Current Step: 0')
 
         pass
 
@@ -209,8 +210,8 @@ class KgoWindow(QMainWindow):
                                                           "Select A SGF File",
                                                           "SGF",
                                                           "SGF Files (*.sgf)")
-        print('fileName1', fileName)
-        print('filetype', filetype)
+        # print('fileName1', fileName)
+        # print('filetype', filetype)
         # self.picpanel.goStonesEngine.initSGF(fileName)
         if fileName:
             stones=self.doLoadSGFfile(fileName, None)
@@ -273,6 +274,7 @@ class KgoWindow(QMainWindow):
         pass
 
     def doResponsePicPanelRepaint(self, index):
+        self.statusBar.showMessage('Current Step: '+ str(index))
         self.infopanel.updateStepIndex(index)
         # print(index)
         pass
