@@ -61,7 +61,7 @@ class PicPanel(QWidget):
         self.bdPixmap = QPixmap('resource\\boards\\board.png')
         self.blPixmap = QPixmap('resource\\stones\\black.png')
         self.wtPixmap = QPixmap('resource\\stones\\white.png')
-        self.lastStepPixmap = QPixmap('resource\\image\\square.gif')
+        self.lastStepPixmap = QPixmap('resource\\image\\triangle.gif')
         self.stepFobidPixmap = QPixmap('resource\\image\\unhappy.png')
 
         self.transToQuadrate(self.bdPixmap)
@@ -137,7 +137,7 @@ class PicPanel(QWidget):
     def drawPanelLines(self, painter):
         linecolor = QColor(70, 70, 70)
         # draw lines
-        painter.setPen(QPen(linecolor, 2))
+        painter.setPen(QPen(linecolor, 1))
 
         for x in range(self.padding, (self.mboardsize) * self.interval + self.padding, self.interval):
             painter.drawLine(x, self.padding, x, (self.mboardsize - 1) * self.interval + self.padding)
@@ -150,8 +150,8 @@ class PicPanel(QWidget):
         for i in [3, 9, 15]:
             for j in [3, 9, 15]:
                 painter.drawEllipse(QPointF(self.padding + self.interval * i, self.padding + self.interval * j),
-                                    self.interval * 0.2,
-                                    self.interval * 0.2)
+                                    self.interval * 0.15,
+                                    self.interval * 0.15)
 
             pass
         pass
@@ -170,6 +170,7 @@ class PicPanel(QWidget):
     def drawMousePos(self, painter):
         color = QColor(30, 240, 30)
         painter.setPen(QPen(color, 1))
+        painter.setOpacity(0.5)
         painter.drawLine(self.padding+(self.mousePos[0]-1)* self.interval, self.padding,
                          self.padding + (self.mousePos[0] - 1) * self.interval,
                          self.padding+(self.mboardsize-1)* self.interval)
@@ -177,6 +178,7 @@ class PicPanel(QWidget):
                          self.padding + (self.mboardsize - 1) * self.interval,
                          self.padding + (self.mousePos[1] - 1) * self.interval)
         if self.goStonesEngine.isHasStoneXY(self.mousePos[0], self.mousePos[1]) is True:
+            painter.setOpacity(1)
             painter.drawPixmap((self.mousePos[0]) * self.interval - self.posPixmapwh.size().width() / 2,
                                (self.mousePos[1]) * self.interval - self.posPixmapwh.size().height() / 2,
                                self.stepFobidPixmap)
