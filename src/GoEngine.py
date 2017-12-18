@@ -30,7 +30,7 @@ class GoEngine():
         self.stones = [[0 for i in range(board)] for i in range(board)]
         for i in range(board):
             for j in range(board):
-                self.stones[i][j] = [i, j, 'empty', False, False]
+                self.stones[i][j] = [i, j, 'empty', False, 'empty']
                 pass
             pass
         self.stepsList = []
@@ -63,8 +63,8 @@ class GoEngine():
         if self.stepsList:
             t = self.stepsList.pop()
             t[2] = 'empty'
-            return True
-        return False
+            return t
+        return None
         pass
 
     def initSGF(self, file=None):
@@ -101,13 +101,21 @@ class GoEngine():
         pass
     def goPreStep(self):
         self.stepPopLastOne()
-        self.maudios['clean'].play()
+        steps= self.stepsList
+        for t in self.stepsList:
+            t[2] = 'empty'
+        self.stepsList = []
+        for t in steps:
+            self.move(t[0]+1, t[1]+1, None)
+
+
         pass
     def goPreNodeStep(self):
         for i in range(5):
             self.stepPopLastOne()
             pass
         self.maudios['clean'].play()
+        self.goPreStep()
         pass
 
 
@@ -115,6 +123,7 @@ class GoEngine():
     def move(self, x, y, color='empty', status=False):
         px = x-1
         py = y-1
+
         if self.stones[px][py][2] is 'black' or self.stones[px][py][2] is 'white':
             print('do move return False')
             return False
@@ -127,7 +136,6 @@ class GoEngine():
                 self.stones[px][py][2] = 'white' if self.stepsList[-1][2] is 'black' else 'black'
 
         self.stones[px][py][3] = status
-        self.stones[px][py][4] = True
 
         self.stepsList.append(self.stones[px][py])
 
@@ -181,8 +189,9 @@ class GoEngine():
         pass
     def updateStepList(self):
         for st in self.deadstoneslist:
+            st[4] = st[2]
             st[2]='empty'
-            st[4] = False
+
         self.deadstoneslist=[]
         pass
 
