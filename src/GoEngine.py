@@ -85,6 +85,7 @@ class GoEngine():
     def goNextStep(self):
         if self.workMode is WorkMode.SGF:
             index=len(self.stepsList)
+            # print('self.sgfFile[index] ', self.sgfFile[index])
             self.move(self.sgfFile[index][0]+1, self.sgfFile[index][1]+1,self.sgfFile[index][2])
             self.maudios['move'].play()
         pass
@@ -111,7 +112,7 @@ class GoEngine():
 
         pass
     def goPreNodeStep(self):
-        for i in range(5):
+        for i in range(8):
             self.stepPopLastOne()
             pass
         self.maudios['clean'].play()
