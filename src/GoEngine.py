@@ -38,7 +38,7 @@ class GoEngine():
 
         # mode: sgf,fight,study
         self.workMode = WorkMode.Study
-        self.sgfFile = None
+        self.sgfFileList = None
 
         self.initAudio()
 
@@ -48,12 +48,14 @@ class GoEngine():
         for t in self.stepsList:
             t[2] = 'empty'
         self.stepsList = []
+        self.maudios['newGo'].play()
         pass
 
     def initAudio(self):
         self.maudios = {
             'move': QSound('resource\\sound\\move.wav'),
-            'deadstone': QSound('resource\\sound\\deadstonemore.wav'),
+            'newGo': QSound('resource\\sound\\cleanboard.wav'),
+            'clean': QSound('resource\\sound\\deadstonemore.wav'),
 
         }
 
@@ -75,20 +77,37 @@ class GoEngine():
         for stone in self.stepsList:
             stone[2] = 'empty'
         self.stepsList=[]
+        self.maudios['clean'].play()
         pass
     def goEndStep(self):
+        self.maudios['move'].play()
         pass
     def goNextStep(self):
+        if self.workMode is WorkMode.SGF:
+            index=len(self.stepsList)
+            self.move(self.sgfFile[index][0]+1, self.sgfFile[index][1]+1,self.sgfFile[index][2])
+            self.maudios['move'].play()
         pass
     def goNextNodeStep(self):
+        if self.workMode is WorkMode.SGF:
+            index=len(self.stepsList)
+            # print('goNextNodeStep index ', index)
+            for i in range(index,8+index):
+                # print('goNextNodeStep: ', self.sgfFile[i][0]+1 )
+                # print('goNextNodeStep: ', self.sgfFile[i][1]+1 )
+                # print('goNextNodeStep: ', self.sgfFile[i][2] )
+                self.move(self.sgfFile[i][0]+1, self.sgfFile[i][1]+1,self.sgfFile[i][2])
+            self.maudios['move'].play()
         pass
     def goPreStep(self):
         self.stepPopLastOne()
+        self.maudios['clean'].play()
         pass
     def goPreNodeStep(self):
         for i in range(5):
             self.stepPopLastOne()
             pass
+        self.maudios['clean'].play()
         pass
 
 
@@ -117,10 +136,19 @@ class GoEngine():
         self.doClearStatus()
         if not ret:
             self.stepsList.pop()
+            print('step not permit')
 
         self.maudios['move'].play()
 
         return ret
+        pass
+    def isHasStoneXY(self,x,y):
+        px = x - 1
+        py = y - 1
+        if self.stones[px][py][2] is 'black' or self.stones[px][py][2] is 'white':
+            # print('it has stones here')
+            return True
+        return False
         pass
     def getStepsLists(self):
         # print("getStepsLists: ",self.stepsList)
@@ -138,7 +166,7 @@ class GoEngine():
             if st:
                 self.collectDeadStoneList(st)
                 self.doClearStatus()
-                self.maudios['deadstone'].play()
+                self.maudios['clean'].play()
         self.updateStepList()
 
         status = self.isStoneLive(stone)

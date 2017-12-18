@@ -25,43 +25,62 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QPushButton, QGridL
 
 
 class PersonView(QWidget):
+
     def __init__(self, *args, **kwargs):
         super(PersonView, self).__init__(*args, **kwargs)
         self.initUI()
         # self.setGeometry(100,100,480,320)
+
         self.show()
         pass
 
     def initUI(self):
         mlayout = QGridLayout(self)
 
-        self.blackpmap=QPixmap('resource\\image\\black.gif')
-        self.whitepmap=QPixmap('resource\\image\\white.gif')
+        self.blackpmap = QPixmap('resource\\image\\black.gif')
+        self.whitepmap = QPixmap('resource\\image\\white.gif')
 
         self.personstone = QLabel(self)
-        # person.setScaledContents(True)
         self.personstone.setPixmap(self.blackpmap)
 
-        # self.portrait = QLabel(self)
-        # # portrait.setScaledContents(True)
-        # # self.portrait.setPixmap(self.blackpmap)
-
-        nameLab = QLabel('Name:',self)
+        nameLab = QLabel('Name:', self)
         self.name = QLabel('XXXX', self)
         levelLab = QLabel('Level:', self)
-        self.level = QLabel('9D',self)
+        self.level = QLabel('9D', self)
+        # .stepNum = QLabel('0', self)
 
-        mlayout.addWidget(self.personstone, 0,0, 1,1, Qt.AlignLeft)
+
+
+        mlayout.addWidget(self.personstone, 0, 0, 1, 1, Qt.AlignLeft)
         # mlayout.addWidget(self.portrait, 0,1)
 
-        mlayout.addWidget(nameLab, 1,0, Qt.AlignLeft)
-        mlayout.addWidget(self.name, 1,1, Qt.AlignHCenter)
+        mlayout.addWidget(nameLab, 1, 0, Qt.AlignLeft)
+        mlayout.addWidget(self.name, 1, 1, Qt.AlignLeft)
 
-        mlayout.addWidget(levelLab, 2,0, Qt.AlignLeft)
-        mlayout.addWidget(self.level, 2,1, Qt.AlignHCenter)
+        mlayout.addWidget(levelLab, 2, 0, Qt.AlignLeft)
+        mlayout.addWidget(self.level, 2, 1, Qt.AlignLeft)
+
+        mlayout.addWidget(levelLab, 2, 0, Qt.AlignLeft)
+
+
         mlayout.setSpacing(2)
-        mlayout.setContentsMargins(20,20,20,20)
+        mlayout.setContentsMargins(20, 20, 20, 20)
         self.setLayout(mlayout)
+
+
+    @property
+    def Name(self):
+        return self.name.text
+    @Name.setter
+    def Name(self,name):
+        self.name.setText(name)
+    @property
+    def Level(self):
+        return self.level.text
+    @Level.setter
+    def Level(self,name):
+        self.level.setText(name)
+
     def setPersonStone(self, stone=None):
         if not stone:
             return False
@@ -73,7 +92,12 @@ class PersonView(QWidget):
             return False
         return True
         pass
+
+    def updateStepNum(self, num):
+        self.stepNum.setText('Steps '+num)
+
     pass
+
 
 class InfoPanel(QWidget):
     def __init__(self, *args, **kwargs):
@@ -91,19 +115,29 @@ class InfoPanel(QWidget):
         toplayout = QHBoxLayout(self)
         groupBox = QGroupBox(self)
 
-        mlayout = QHBoxLayout(self)
+        mlayout = QGridLayout(self)
+        self.stepIndexLabel = QLabel('Steps: 0', self)
+
         self.black = PersonView(self)
+        self.black.Name = 'black'
+
         self.white = PersonView(self)
         self.white.setPersonStone('white')
-        mlayout.addWidget(self.black)
-        mlayout.addWidget(self.white)
+        self.white.Name='white'
+        self.white.Level='10D'
+
+        mlayout.addWidget(self.black, 0, 0 ,1,1)
+        mlayout.addWidget(self.white, 0,1, 1,1)
+        mlayout.addWidget(self.stepIndexLabel, 1, 0, 1, 2, Qt.AlignHCenter)
 
         groupBox.setLayout(mlayout)
         toplayout.addWidget(groupBox)
         self.setLayout(toplayout)
         pass
+    def updateStepIndex(self,  index):
+        self.stepIndexLabel.setText('Steps ' + str(index))
+        pass
 
-  
 
 
 if __name__ == '__main__':
