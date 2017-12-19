@@ -46,9 +46,6 @@ class KgoWindow(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowIcon(QIcon('resource\\image\\app.ico'))
 
-        # self.initMenu()
-        self.initStatusBar()
-        # self.initToolBars()
         self.initWinLayout()
 
         self.mSettingPanel=None
@@ -66,7 +63,7 @@ class KgoWindow(QMainWindow):
 
     def initWinLayout(self):
         self.picpanel = PicPanel(self)
-        self.picpanel.mSignalHasRepaint.connect(self.doUpdateStepNumSlot)
+        self.picpanel.mSignalUpdateCurStepNum.connect(self.doUpdateStepNumSlot)
 
         self.infopanel = InfoPanel(self)
         self.initCustToolBar()
@@ -95,7 +92,7 @@ class KgoWindow(QMainWindow):
     def initCustToolBar(self):
         self.custToolBar=QGroupBox()
         hlayout = QHBoxLayout()
-        hlayout.addStretch(1)
+        hlayout.addStretch(3)
         fileBarList = [(QIcon('resource\\toolbar\\open.png'),       self.doOpenFileAction),
                        (QIcon('resource\\toolbar\\page_save.png'),  self.doSaveFileAction),
                        (QIcon('resource\\toolbar\\new.png'),        self.doNewAction),
@@ -117,6 +114,33 @@ class KgoWindow(QMainWindow):
             hlayout.setSpacing(1)
 
         hlayout.addStretch(1)
+
+        # add a slide to show step progress
+        self.mCurNumLabel = QLabel(self)
+        self.mCurNumLabel.setText('0')
+        self.picpanel.mSignalUpdateCurStepNum.connect(self.mCurNumLabel.setNum)
+
+        self.mMaxNumLabel = QLabel(self)
+        self.mMaxNumLabel.setText('361')
+
+        self.mIndexSlider = QSlider(Qt.Horizontal,self)
+        self.mIndexSlider.setMaximum(361)
+        self.mIndexSlider.setMinimum(0)
+        self.mIndexSlider.setValue(0)
+        self.picpanel.mSignalUpdateCurStepNum.connect(self.mIndexSlider.setValue)
+
+
+        hlayout.addWidget(self.mCurNumLabel)
+        hlayout.addWidget(self.mIndexSlider)
+
+
+        # self.mlcd.setMaximumWidth(20)
+
+
+        hlayout.addWidget(self.mMaxNumLabel)
+
+        hlayout.addStretch(2)
+
         self.custToolBar.setLayout(hlayout)
 
         pass
@@ -129,6 +153,8 @@ class KgoWindow(QMainWindow):
                        QMessageBox.Cancel)
 
         if mbox == QMessageBox.Yes:
+            self.mIndexSlider.setMaximum(361)
+            self.mMaxNumLabel.setText('361')
             self.picpanel.newPanel()
 
     def doStartAction(self):
@@ -156,11 +182,6 @@ class KgoWindow(QMainWindow):
         self.picpanel.mSignalTriggleRepaint.emit()
         pass
 
-    def initStatusBar(self):
-        self.statusBar = self.statusBar()
-        self.statusBar.showMessage('Current Step: 0')
-
-        pass
 
     def newMenuAction(self, text="newaction", icon=None, tip=None, slot=None, shortcut=None):
         action = QAction(text, self)
@@ -186,9 +207,11 @@ class KgoWindow(QMainWindow):
         # print('filetype', filetype)
         # self.picpanel.goStonesEngine.initSGF(fileName)
         if fileName:
-            stones=self.doLoadSGFfile(fileName, None)
-            if stones:
-                self.picpanel.goStonesEngine.initSGF(stones)
+            stonesList=self.doLoadSGFfile(fileName, None)
+            if stonesList:
+                self.mIndexSlider.setMaximum(len(stonesList))
+                self.mMaxNumLabel.setText(str(len(stonesList)))
+                self.picpanel.goStonesEngine.initSGF(stonesList)
 
             pass
 
@@ -260,7 +283,7 @@ class KgoWindow(QMainWindow):
         pass
 
     def doUpdateStepNumSlot(self, index):
-        self.statusBar.showMessage('Current Step: '+ str(index))
+        self.mIndexSlider.setValue(index)
         self.infopanel.updateStepIndex(index)
         # print(index)
         pass

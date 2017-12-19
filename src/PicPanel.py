@@ -19,7 +19,7 @@ from src.GoEngine import GoEngine
 
 class PicPanel(QWidget):
     mSignalTriggleRepaint = pyqtSignal()
-    mSignalHasRepaint= pyqtSignal(int)
+    mSignalUpdateCurStepNum= pyqtSignal(int)
 
     def __init__(self, *args, **kwargs):
         super(PicPanel, self).__init__(*args, **kwargs)
@@ -114,7 +114,7 @@ class PicPanel(QWidget):
         pass
 
     def sigUpdateHandler(self):
-        self.mSignalHasRepaint.emit(len(self.goStonesEngine.getStepsLists()))
+        self.mSignalUpdateCurStepNum.emit(len(self.goStonesEngine.getStepsLists()))
         self.update()
 
     def paintEvent(self, QPaintEvent):
@@ -243,7 +243,7 @@ class PicPanel(QWidget):
 
         if px > 0 and py > 0:
             if self.goStonesEngine.move(px, py, None, False) is True:
-                self.mSignalHasRepaint.emit(len(self.goStonesEngine.getStepsLists()))
+                self.mSignalUpdateCurStepNum.emit(len(self.goStonesEngine.getStepsLists()))
                 self.update()
             pass
 
