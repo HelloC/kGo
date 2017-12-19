@@ -25,6 +25,7 @@ from src.ctrlPanel import CtrlPanel
 class KgoWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(KgoWindow, self).__init__(*args, **kwargs)
+        # self.setWindowFlags(Qt.FramelessWindowHint)
         self.title = 'K-Go'
         self.left = 400
         self.top = 400
@@ -47,7 +48,7 @@ class KgoWindow(QMainWindow):
 
         # self.initMenu()
         self.initStatusBar()
-        self.initToolBars()
+        # self.initToolBars()
         self.initWinLayout()
 
         self.setCentralWidget(self.topGroupBox)
@@ -63,6 +64,7 @@ class KgoWindow(QMainWindow):
 
     def initWinLayout(self):
         # self.wpanel = KPanel(self)
+        self.initCustToolBar()
         self.picpanel = PicPanel(self)
         self.picpanel.sigRepaint.connect(self.doResponsePicPanelRepaint)
         # self.picpanel.goStonesEngine.sigStepsNum.connect(self.doResponsePicPanelRepaint)
@@ -92,62 +94,63 @@ class KgoWindow(QMainWindow):
 
         # self.setLayout(self.mlayout)
         mgridLayout = QGridLayout()
-        mgridLayout.addWidget(picGroupBox, 0, 0)
-        mgridLayout.addWidget(infogbox, 0, 1)
+        mgridLayout.addWidget(self.custToolBar, 0,0, 1,2)
+        mgridLayout.addWidget(picGroupBox, 1, 0, 1,2)
+        mgridLayout.addWidget(infogbox, 0, 2, 2,1)
         # self.setLayout(mgridLayout)
         self.topGroupBox.setLayout(mgridLayout)
 
-    def initToolBars(self):
-
-        self.mTBarFile = self.addToolBar('FileBar')
-        fileBarList = [('Open', QIcon('resource\\toolbar\\open.png'), 'Open SGF File', self.doOpenFileAction),
-                       ('Open', QIcon('resource\\toolbar\\page_save.png'), 'Save SGF File', self.doSaveFileAction),
+    def initCustToolBar(self):
+        self.custToolBar=QGroupBox()
+        hlayout = QHBoxLayout()
+        hlayout.addStretch(1)
+        fileBarList = [(QIcon('resource\\toolbar\\open.png'),       self.doOpenFileAction),
+                       (QIcon('resource\\toolbar\\page_save.png'),  self.doSaveFileAction),
+                       (QIcon('resource\\toolbar\\new.png'),        self.doNewAction),
+                       (QIcon('resource\\toolbar\\start.png'),      self.doStartAction),
+                       (QIcon('resource\\toolbar\\prenode.png'),    self.doPreNodeAction),
+                       (QIcon('resource\\toolbar\\pre.png'),        self.doPreAction),
+                       (QIcon('resource\\toolbar\\next.png'),       self.doNextAction),
+                       (QIcon('resource\\toolbar\\nextnode.png'),   self.doNextNodeAction),
+                       (QIcon('resource\\toolbar\\end.png'),        self.doEndAction),
+                       (QIcon('resource\\image\\info.png'),         self.doShowInfoAction),
                        ]
+
         for item in fileBarList:
-            act = QAction(item[0], self)
-            act.setIcon(item[1])
-            act.setToolTip(item[2])
-            act.triggered.connect(item[3])
-            self.mTBarFile.addAction(act)
+            b = QPushButton(icon=item[0],parent =self)
+            b.clicked.connect(item[1])
+            b.setMaximumSize(b.minimumSizeHint())
+            hlayout.addWidget(b)
+            hlayout.setSpacing(1)
 
-        self.mTbarBoard = self.addToolBar('BoardBar')
-        boardBarList = [('New',     QIcon('resource\\toolbar\\new.png'),     'Create A Board',   self.doNewAction),
-                       ('start',    QIcon('resource\\toolbar\\start.png'),   'Go start step',    self.doStartAction),
-                       ('PreTen',   QIcon('resource\\toolbar\\prenode.png'),  'Pre Node step',     self.doPreNodeAction),
-                       ('Pre',      QIcon('resource\\toolbar\\pre.png'),     'Pre step',         self.doPreAction),
-                       ('next',     QIcon('resource\\toolbar\\next.png'),    'next step',        self.doNextAction),
-                       ('nextTen',  QIcon('resource\\toolbar\\nextnode.png'), 'next Node step',    self.doNextNodeAction),
-                       ('end',      QIcon('resource\\toolbar\\end.png'),     'Go end step',      self.doEndAction)
-                       ]
+        btnSetting=QPushButton(icon=QIcon('resource\\image\\setting.png'), parent=self)
 
-        for item in boardBarList:
-            act = QAction(item[0], self)
-            act.setIcon(item[1])
-            act.setToolTip(item[2])
-            act.triggered.connect(item[3])
-            self.mTbarBoard.addAction(act)
+        mNumMenu= QMenu()
+        mshowtGroup = QActionGroup(self)
+        mshowtGroup.setExclusive(True)
 
-        self.mTBarSet = self.addToolBar('SettingBar')
-        setBarList = [('Info', QIcon('resource\\image\\setting.png'), 'setting', self.doSettingAction),
-                       ]
-        for item in setBarList:
-            act = QAction(item[0], self)
-            act.setIcon(item[1])
-            act.setToolTip(item[2])
-            act.triggered.connect(item[3])
-            self.mTBarSet.addAction(act)
+        mShowNum=QAction('show ALl num', mshowtGroup)
+        mShowNum.setCheckable(True)
+        mLastNum=QAction('show Last num', mshowtGroup)
+        mLastNum.setCheckable(True)
 
-        self.mTBarInfo = self.addToolBar('InfoBar')
-        infoBarList = [('Info', QIcon('resource\\image\\info.png'), 'show info', self.doShowInfoAction),
-                       ]
-        for item in infoBarList:
-            act = QAction(item[0], self)
-            act.setIcon(item[1])
-            act.setToolTip(item[2])
-            act.triggered.connect(item[3])
-            self.mTBarInfo.addAction(act)
+        mShowTriangle=QAction('show Triangle',mshowtGroup)
+        mShowTriangle.setCheckable(True)
+        mShowTriangle.setChecked(True)
 
-    pass
+        mNumMenu.addAction(mShowNum)
+        mNumMenu.addAction(mLastNum)
+        mNumMenu.addAction(mShowTriangle)
+        # mNumMenu
+        btnSetting.setMenu(mNumMenu)
+
+        # btnSet.clicked.connect(self.doSettingAction)
+        hlayout.addWidget(btnSetting)
+
+        hlayout.addStretch(1)
+        self.custToolBar.setLayout(hlayout)
+
+        pass
 
     def doNewAction(self):
         mbox = QMessageBox.question(self,
