@@ -15,10 +15,10 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from sgfmill import sgf, sgf_moves, ascii_boards
-from src import kGoSGFparser
 from src.InfoPanel import InfoPanel
 from src.PicPanel import PicPanel
 import src.kGoSGFparser
+from src.SettingPanel import SettingPanel
 from src.ctrlPanel import CtrlPanel
 
 
@@ -51,6 +51,8 @@ class KgoWindow(QMainWindow):
         # self.initToolBars()
         self.initWinLayout()
 
+        self.mSettingPanel=None
+
         self.setCentralWidget(self.topGroupBox)
 
         pass
@@ -63,22 +65,16 @@ class KgoWindow(QMainWindow):
 
 
     def initWinLayout(self):
-        # self.wpanel = KPanel(self)
-        self.initCustToolBar()
         self.picpanel = PicPanel(self)
-        self.picpanel.sigRepaint.connect(self.doResponsePicPanelRepaint)
-        # self.picpanel.goStonesEngine.sigStepsNum.connect(self.doResponsePicPanelRepaint)
+        self.picpanel.mSignalHasRepaint.connect(self.doUpdateStepNumSlot)
 
         self.infopanel = InfoPanel(self)
-        # self.ctrlpanel = CtrlPanel(self)
+        self.initCustToolBar()
 
         self.topGroupBox = QGroupBox(self)
 
         picGroupBox = QGroupBox(self)
         mVlayout = QVBoxLayout()
-        # mVlayout = QGridLayout()
-        # mVlayout.addWidget(self.picpanel, 0,0, 1, 5)
-        # mVlayout.addWidget(self.ctrlpanel, 1,2, 1,1)
         mVlayout.addWidget(self.picpanel)
         picGroupBox.setLayout(mVlayout)
 
@@ -88,17 +84,13 @@ class KgoWindow(QMainWindow):
         mVlayout.addStretch(1)
         infogbox.setLayout(mVlayout)
 
-        # mlayout = QHBoxLayout()
-        # mlayout.addWidget(self.picpanel)
-        # mlayout.addWidget(self.ctrlpanel)
-
-        # self.setLayout(self.mlayout)
         mgridLayout = QGridLayout()
         mgridLayout.addWidget(self.custToolBar, 0,0, 1,2)
         mgridLayout.addWidget(picGroupBox, 1, 0, 1,2)
         mgridLayout.addWidget(infogbox, 0, 2, 2,1)
-        # self.setLayout(mgridLayout)
+
         self.topGroupBox.setLayout(mgridLayout)
+
 
     def initCustToolBar(self):
         self.custToolBar=QGroupBox()
@@ -113,6 +105,7 @@ class KgoWindow(QMainWindow):
                        (QIcon('resource\\toolbar\\next.png'),       self.doNextAction),
                        (QIcon('resource\\toolbar\\nextnode.png'),   self.doNextNodeAction),
                        (QIcon('resource\\toolbar\\end.png'),        self.doEndAction),
+                       (QIcon('resource\\image\\setting.png'),       self.doSettingAction),
                        (QIcon('resource\\image\\info.png'),         self.doShowInfoAction),
                        ]
 
@@ -122,30 +115,6 @@ class KgoWindow(QMainWindow):
             b.setMaximumSize(b.minimumSizeHint())
             hlayout.addWidget(b)
             hlayout.setSpacing(1)
-
-        btnSetting=QPushButton(icon=QIcon('resource\\image\\setting.png'), parent=self)
-
-        mNumMenu= QMenu()
-        mshowtGroup = QActionGroup(self)
-        mshowtGroup.setExclusive(True)
-
-        mShowNum=QAction('show ALl num', mshowtGroup)
-        mShowNum.setCheckable(True)
-        mLastNum=QAction('show Last num', mshowtGroup)
-        mLastNum.setCheckable(True)
-
-        mShowTriangle=QAction('show Triangle',mshowtGroup)
-        mShowTriangle.setCheckable(True)
-        mShowTriangle.setChecked(True)
-
-        mNumMenu.addAction(mShowNum)
-        mNumMenu.addAction(mLastNum)
-        mNumMenu.addAction(mShowTriangle)
-        # mNumMenu
-        btnSetting.setMenu(mNumMenu)
-
-        # btnSet.clicked.connect(self.doSettingAction)
-        hlayout.addWidget(btnSetting)
 
         hlayout.addStretch(1)
         self.custToolBar.setLayout(hlayout)
@@ -164,27 +133,27 @@ class KgoWindow(QMainWindow):
 
     def doStartAction(self):
         self.picpanel.goStonesEngine.goStartStep()
-        self.picpanel.sigUpdate.emit()
+        self.picpanel.mSignalTriggleRepaint.emit()
         pass
     def doPreAction(self):
         self.picpanel.goStonesEngine.goPreStep()
-        self.picpanel.sigUpdate.emit()
+        self.picpanel.mSignalTriggleRepaint.emit()
         pass
     def doPreNodeAction(self):
         self.picpanel.goStonesEngine.goPreNodeStep()
-        self.picpanel.sigUpdate.emit()
+        self.picpanel.mSignalTriggleRepaint.emit()
 
     def doNextAction(self):
         self.picpanel.goStonesEngine.goNextStep()
-        self.picpanel.sigUpdate.emit()
+        self.picpanel.mSignalTriggleRepaint.emit()
         pass
     def doNextNodeAction(self):
         self.picpanel.goStonesEngine.goNextNodeStep()
-        self.picpanel.sigUpdate.emit()
+        self.picpanel.mSignalTriggleRepaint.emit()
         pass
     def doEndAction(self):
         self.picpanel.goStonesEngine.goEndStep()
-        self.picpanel.sigUpdate.emit()
+        self.picpanel.mSignalTriggleRepaint.emit()
         pass
 
     def initStatusBar(self):
@@ -270,13 +239,27 @@ class KgoWindow(QMainWindow):
         print('doSaveFileAction -->')
         pass
     def doShowInfoAction(self):
+        print('doShowInfoAction')
 
         pass
 
     def doSettingAction(self):
+        print('doSettingAction')
+        # self.mSettingPanel.show()
+        if self.mSettingPanel is None:
+            self.mSettingPanel = SettingPanel()
+            self.mSettingPanel.mIndexCombobox.currentTextChanged.connect(self.domShowStonesIndexSlot)
+        else:
+            self.mSettingPanel.show()
+
+
+        pass
+    def domShowStonesIndexSlot(self, text):
+        self.picpanel.ShowStonesIndex=text
+        self.picpanel.mSignalTriggleRepaint.emit()
         pass
 
-    def doResponsePicPanelRepaint(self, index):
+    def doUpdateStepNumSlot(self, index):
         self.statusBar.showMessage('Current Step: '+ str(index))
         self.infopanel.updateStepIndex(index)
         # print(index)

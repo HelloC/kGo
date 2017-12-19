@@ -8,6 +8,8 @@
  
 '''
 import sys
+from enum import Enum
+
 from PyQt5.QtCore import QPointF, pyqtSignal, Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
 from PyQt5.QtGui import QIcon, QPainter, QColor, QPen,  QPixmap
@@ -15,12 +17,9 @@ from PyQt5.QtGui import QIcon, QPainter, QColor, QPen,  QPixmap
 from src.GoEngine import GoEngine
 
 
-
-
-
 class PicPanel(QWidget):
-    sigUpdate = pyqtSignal()
-    sigRepaint= pyqtSignal(int)
+    mSignalTriggleRepaint = pyqtSignal()
+    mSignalHasRepaint= pyqtSignal(int)
 
     def __init__(self, *args, **kwargs):
         super(PicPanel, self).__init__(*args, **kwargs)
@@ -34,6 +33,7 @@ class PicPanel(QWidget):
 
         self.mboardsize = 19
         self.mousePos=[10,10]
+        self.mShowStonesIndex='ShowTriangle'
 
         self._goStonesEngine = GoEngine()
 
@@ -74,7 +74,7 @@ class PicPanel(QWidget):
 
         pass
     def initSignals(self):
-        self.sigUpdate.connect(self.sigUpdateHandler)
+        self.mSignalTriggleRepaint.connect(self.sigUpdateHandler)
 
 
 
@@ -114,7 +114,7 @@ class PicPanel(QWidget):
         pass
 
     def sigUpdateHandler(self):
-        self.sigRepaint.emit(len(self.goStonesEngine.getStepsLists()))
+        self.mSignalHasRepaint.emit(len(self.goStonesEngine.getStepsLists()))
         self.update()
 
     def paintEvent(self, QPaintEvent):
@@ -201,7 +201,11 @@ class PicPanel(QWidget):
 
 
     def drawPoints(self, painter):
+        painter.setPen(QPen(QColor(230, 30, 30), 5))
+
         for tpoint in self.goStonesEngine.getStepsLists():
+            if tpoint[2] is 'empty':
+                continue
 
             if tpoint[2] is 'black':
                 painter.drawPixmap((tpoint[0] + 1) * self.interval - self.blackPixmap.size().width() / 2,
@@ -211,15 +215,27 @@ class PicPanel(QWidget):
                 painter.drawPixmap((tpoint[0] + 1) * self.interval - self.blackPixmap.size().width() / 2,
                                    (tpoint[1] + 1) * self.interval - self.blackPixmap.size().height() / 2,
                                    self.whitePixmap)
-            else:
+            # print(self.mShowStonesIndex)
+            # print(id(self.mShowStonesIndex))
+            # print(id('ShowAllIndex'))
+            if self.ShowStonesIndex == 'ShowAllIndex':
+                painter.drawText((tpoint[0] + 1) * self.interval-3,
+                                 (tpoint[1] + 1) * self.interval+3,
+                                 str(self.goStonesEngine.getStepsLists().index(tpoint)+1))
                 pass
-            pass
+
         tpointlist=self.goStonesEngine.getStepsLists()
         if tpointlist:
-            tpoint = tpointlist[-1]
+            tpoint=tpointlist[-1]
             painter.drawPixmap((tpoint[0] + 1) * self.interval - self.lastStepPixmap.size().width() / 2,
                                 (tpoint[1] + 1) * self.interval - self.lastStepPixmap.size().height() / 2,
                                 self.lastStepPixmap)
+            if self.mShowStonesIndex == 'ShowLastIndex':
+                painter.drawText((tpoint[0] + 1) * self.interval - 3,
+                                 (tpoint[1] + 1) * self.interval + 3,
+                                 str(self.goStonesEngine.getStepsLists().index(tpoint)+1))
+
+
         pass
 
     def mouseReleaseEvent(self, cursor_event):
@@ -227,7 +243,7 @@ class PicPanel(QWidget):
 
         if px > 0 and py > 0:
             if self.goStonesEngine.move(px, py, None, False) is True:
-                self.sigRepaint.emit(len(self.goStonesEngine.getStepsLists()))
+                self.mSignalHasRepaint.emit(len(self.goStonesEngine.getStepsLists()))
                 self.update()
             pass
 
@@ -280,7 +296,15 @@ class PicPanel(QWidget):
         return ret
         pass
 
+    @property
+    def ShowStonesIndex(self):
+        return self.mShowStonesIndex
+    @ShowStonesIndex.setter
+    def ShowStonesIndex(self, text):
+        self.mShowStonesIndex=text
     pass
+
+
 
 
 if __name__ == '__main__':
