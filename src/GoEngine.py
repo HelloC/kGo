@@ -70,6 +70,8 @@ class GoEngine():
     def initSGF(self, file=None):
         self.sgfFile=file
         self.workMode=WorkMode.SGF
+        for stone in self.stepsList:
+            stone[2] = 'empty'
         self.stepsList=[]
         pass
 
@@ -80,23 +82,28 @@ class GoEngine():
         self.maudios['clean'].play()
         pass
     def goEndStep(self):
+        if self.workMode is WorkMode.SGF:
+            for i in range(len(self.sgfFile)):
+                print('i ', i)
+                self.move(self.sgfFile[i][0]+1, self.sgfFile[i][1]+1, self.sgfFile[i][2])
         self.maudios['move'].play()
         pass
     def goNextStep(self):
         if self.workMode is WorkMode.SGF:
-            index=len(self.stepsList)
-            # print('self.sgfFile[index] ', self.sgfFile[index])
-            self.move(self.sgfFile[index][0]+1, self.sgfFile[index][1]+1,self.sgfFile[index][2])
-            self.maudios['move'].play()
+            slistLen=len(self.stepsList)
+            # print('goNextStep slistLen: ',slistLen, ' sgf len ', len(self.sgfFile))
+            if slistLen  < len(self.sgfFile):
+                self.move(self.sgfFile[slistLen][0]+1, self.sgfFile[slistLen][1]+1,self.sgfFile[slistLen][2])
+                self.maudios['move'].play()
         pass
     def goNextNodeStep(self):
         if self.workMode is WorkMode.SGF:
-            index=len(self.stepsList)
+            slistlen=len(self.stepsList)
+            steplen=10
             # print('goNextNodeStep index ', index)
-            for i in range(index,8+index):
-                # print('goNextNodeStep: ', self.sgfFile[i][0]+1 )
-                # print('goNextNodeStep: ', self.sgfFile[i][1]+1 )
-                # print('goNextNodeStep: ', self.sgfFile[i][2] )
+            maxstep = (steplen+slistlen) if len(self.sgfFile) > (steplen+slistlen ) else len(self.sgfFile)-1
+
+            for i in range(slistlen, maxstep):
                 self.move(self.sgfFile[i][0]+1, self.sgfFile[i][1]+1,self.sgfFile[i][2])
             self.maudios['move'].play()
         pass
@@ -126,7 +133,7 @@ class GoEngine():
         py = y-1
 
         if self.stones[px][py][2] is 'black' or self.stones[px][py][2] is 'white':
-            print('do move return False')
+            print('do move return False: ', x , ' ', y,' ', self.stones[px][py][2])
             return False
         if color is not None:
             self.stones[px][py][2] = color
@@ -144,8 +151,8 @@ class GoEngine():
 
         self.doClearStatus()
         if not ret:
-            self.stepsList.pop()
-            print('step not permit')
+            t= self.stepsList.pop()
+            print('step not permit stone: ', t)
 
         self.maudios['move'].play()
 
@@ -181,6 +188,7 @@ class GoEngine():
         status = self.isStoneLive(stone)
         self.doClearStatus()
         if not status:
+            print('stone ', stone)
             self.collectDeadStoneList(stone)
             self.doClearStatus()
             self.updateStepList()
