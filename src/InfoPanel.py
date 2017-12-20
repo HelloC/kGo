@@ -8,7 +8,7 @@
  
 '''
 # !/usr/bin/env python3
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QTextBlock, QStaticText
 
 '''
  ProjectName: kGo
@@ -21,7 +21,8 @@ from PyQt5.QtGui import QIcon, QPixmap
 import sys
 
 from PyQt5.QtCore import QMargins, Qt
-from PyQt5.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QPushButton, QGridLayout, QApplication, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QPushButton, QGridLayout, QApplication, QHBoxLayout, \
+    QLabel, QTextEdit, QPlainTextEdit
 
 
 class PersonView(QWidget):
@@ -112,7 +113,7 @@ class InfoPanel(QWidget):
         # self.setGeometry(100,100, 320, 600)
         # self.initVSLayout()
         # self.initbtnLayout()
-        toplayout = QHBoxLayout(self)
+        toplayout = QVBoxLayout(self)
         groupBox = QGroupBox(self)
 
         mlayout = QGridLayout(self)
@@ -132,6 +133,12 @@ class InfoPanel(QWidget):
 
         groupBox.setLayout(mlayout)
         toplayout.addWidget(groupBox)
+
+        mTextEditor = QTextEdit()
+        mTextEditor.setDisabled(True)
+        mTextEditor.setText('VS')
+        toplayout.addWidget(mTextEditor)
+
         self.setLayout(toplayout)
         pass
     def updateStepIndex(self,  index):
