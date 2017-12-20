@@ -219,7 +219,7 @@ class KgoWindow(QMainWindow):
 
     def doLoadSGFfile(self, pathname, move_number=None):
         stones=[]
-        print('pathname ',pathname)
+        # print('pathname ',pathname)
         f = open(pathname, "rb")
         sgf_src = f.read()
         f.close()
@@ -227,6 +227,23 @@ class KgoWindow(QMainWindow):
 
         try:
             sgf_game = sgf.Sgf_game.from_bytes(sgf_src)
+            text=[]
+            if sgf_game.get_gamename() is None :
+                text.append(sgf_game.get_player_name('b') + ' VS '+sgf_game.get_player_name('w')+'\n')
+            else:
+                text.append((str(sgf_game.get_gamename())) + '\n')
+            text.append('Winner:   '+str(sgf_game.get_winner())+'\n')
+            text.append('size:     '+str(sgf_game.get_size())+'\n')
+            text.append('komi:     ' +str(sgf_game.get_komi()) +'\n')
+            text.append('handicap: ' +str(sgf_game.get_handicap()) +'\n')
+            text.append('TotalTime:'+(str(sgf_game.get_times()/3600) if sgf_game.get_times() is not None else '0')+'\n')
+            text.append('overtime: '+str(sgf_game.get_overtime())+'\n')
+            text.append(str(sgf_game.get_common())+'\n')
+
+            self.infopanel.mTextEditor.setText(''.join(text))
+            self.infopanel.black.Name=sgf_game.get_player_name('b')
+            self.infopanel.white.Name=sgf_game.get_player_name('w')
+
         except ValueError:
             raise Exception("bad sgf file")
 
@@ -255,7 +272,6 @@ class KgoWindow(QMainWindow):
 
         # print('board ', board)
         # print(ascii_boards.render_board(board))
-        print()
         pass
 
     def doSaveFileAction(self):
@@ -263,6 +279,93 @@ class KgoWindow(QMainWindow):
         pass
     def doShowInfoAction(self):
         print('doShowInfoAction')
+        info='''a(large) group of stones 一条（大）龙
+            alive活（棋）
+            aji味
+            areas实地
+            atari打吃
+            Baduk围棋
+            Black黑棋
+            board棋盘
+            bowl棋盒
+            capture提子
+            capturingraces 对杀
+            compensationpoints 贴目
+            connection连接
+            corner角
+            dame单官
+            dan（业余/职业）（）段
+            danpro 职业（）段
+            dead死（棋）
+            divinemove 胜负手
+            edge边
+            eye眼
+            falseeyes 假眼
+            fiveby five 五五
+            forcingmoves 劫财
+            fuseki布局
+            Go围棋
+            gote后手
+            gridsize 棋盘尺寸（9X9，13X13，19X19）
+            handicap泛指包括让子和贴目等形式在内的指导棋
+            hane扳
+            hayago快棋
+            higheye 高目
+            highkakari 高挂
+            Igo围棋
+            influence-orientedapproach 注重外势
+            jigo和棋
+            joseki定石/定式
+            jungsuk定石/定式
+            kakari挂
+            kifu棋谱
+            ko劫
+            kofights 打劫
+            komi贴目
+            korigatachi愚形
+            kosumi小尖
+            kyu级
+            ladder征子
+            largehigh eye 超高目
+            liberties气
+            lightness薄
+            lowkakari 低挂
+            miai见合
+            monkeyjump 伸腿
+            move一招棋、一手棋
+            moyo模样
+            myoushu妙手
+            nakade点杀
+            net枷吃
+            nidanbane 连扳
+            originof heaven 天元
+            outsidethe eye 目外
+            outsidethe large eye 超目外
+            pass停一手
+            rank级别、段位
+            resignation投子认负
+            rule-sets（中国/日本/韩国）规则
+            score点目
+            seki双活
+            sente先手
+            separation分离/分断
+            shape棋形
+            side边
+            smalleye 小目
+            snapback倒扑
+            starpoint 星位
+            stone棋子
+            tengen天元
+            territorialapproach 注重实地
+            territories实地
+            tesuji手筋
+            thickness厚实
+            threeby three 三三
+            tsumego诘棋/死活题
+            Weiqi围棋
+            White白棋
+            yose官子
+            yosu miru 试应手'''
 
         pass
 
@@ -284,7 +387,6 @@ class KgoWindow(QMainWindow):
 
     def doUpdateStepNumSlot(self, index):
         self.mIndexSlider.setValue(index)
-        self.infopanel.updateStepIndex(index)
         # print(index)
         pass
     pass

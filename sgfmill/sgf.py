@@ -826,8 +826,40 @@ class Sgf_game:
         except LookupError:
             return None
         if colour not in ("b", "w"):
-            return None
+            # return None
+            return str(colour)
         return colour
+    def get_date(self):
+        try:
+            return self.root.get("DT")
+        except KeyError:
+            return None
+    def get_common(self):
+        try:
+            return self.root.get("C")
+        except KeyError:
+            return None
+    def get_times(self):
+        try:
+            return self.root.get("TM")
+        except KeyError:
+            return None
+    def get_overtime(self):
+        try:
+            return self.root.get("OT")
+        except KeyError:
+            return None
+    def get_rules(self):
+        try:
+            return self.root.get("RU")
+        except KeyError:
+            return None
+    def get_gamename(self):
+        try:
+            return self.root.get("GN")
+        except KeyError:
+            return None
+
 
     def set_date(self, date=None):
         """Set the DT property to a single date.

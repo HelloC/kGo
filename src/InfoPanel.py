@@ -48,12 +48,11 @@ class PersonView(QWidget):
         self.name = QLabel('XXXX', self)
         levelLab = QLabel('Level:', self)
         self.level = QLabel('9D', self)
-        # .stepNum = QLabel('0', self)
+
 
 
 
         mlayout.addWidget(self.personstone, 0, 0, 1, 1, Qt.AlignLeft)
-        # mlayout.addWidget(self.portrait, 0,1)
 
         mlayout.addWidget(nameLab, 1, 0, Qt.AlignLeft)
         mlayout.addWidget(self.name, 1, 1, Qt.AlignLeft)
@@ -61,7 +60,6 @@ class PersonView(QWidget):
         mlayout.addWidget(levelLab, 2, 0, Qt.AlignLeft)
         mlayout.addWidget(self.level, 2, 1, Qt.AlignLeft)
 
-        mlayout.addWidget(levelLab, 2, 0, Qt.AlignLeft)
 
 
         mlayout.setSpacing(2)
@@ -94,9 +92,6 @@ class PersonView(QWidget):
         return True
         pass
 
-    def updateStepNum(self, num):
-        self.stepNum.setText('Steps '+num)
-
     pass
 
 
@@ -117,7 +112,7 @@ class InfoPanel(QWidget):
         groupBox = QGroupBox(self)
 
         mlayout = QGridLayout(self)
-        self.stepIndexLabel = QLabel('Steps: 0', self)
+
 
         self.black = PersonView(self)
         self.black.Name = 'black'
@@ -129,20 +124,20 @@ class InfoPanel(QWidget):
 
         mlayout.addWidget(self.black, 0, 0 ,1,1)
         mlayout.addWidget(self.white, 0,1, 1,1)
-        mlayout.addWidget(self.stepIndexLabel, 1, 0, 1, 2, Qt.AlignHCenter)
+
 
         groupBox.setLayout(mlayout)
         toplayout.addWidget(groupBox)
 
-        mTextEditor = QTextEdit()
-        mTextEditor.setDisabled(True)
-        mTextEditor.setText('VS')
-        toplayout.addWidget(mTextEditor)
+        self.mTextEditor = QTextEdit()
+        self.mTextEditor.setDisabled(True)
+        # self.mTextEditor.setText('VSsdfsdfffffffffffffffffsdfffffffffffffffffffffffffffffffffffffffffffffff')
+        self.mTextEditor.setText('infomation')
+        toplayout.addWidget(self.mTextEditor)
 
         self.setLayout(toplayout)
         pass
     def updateStepIndex(self,  index):
-        self.stepIndexLabel.setText('Steps ' + str(index))
         pass
 
 
