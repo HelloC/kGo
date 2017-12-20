@@ -12,15 +12,17 @@ import sys
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QPushButton, QMenu, QActionGroup, QAction, QComboBox, \
-    QHBoxLayout
+    QHBoxLayout, QDialog
 
 
-class SettingPanel(QWidget):
+class SettingPanel(QDialog):
     mSignalShowIndex=pyqtSignal(str)
     def __init__(self,*args, **kwargs):
         super(SettingPanel, self).__init__(*args, **kwargs)
         self.title='k-Go Setting'
         # self.setGeometry(200,200, 480,320)
+        # self.setSizeGripEnabled(True)
+        self.setModal(True)
         self.initUI()
 
     def initUI(self):
